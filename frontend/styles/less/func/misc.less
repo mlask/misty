@@ -1,0 +1,62 @@
+.box-sizing (@box-sizing) {
+	-webkit-box-sizing: @box-sizing;
+	-moz-box-sizing: @box-sizing;
+	box-sizing: @box-sizing;
+}
+.round (@radius: @default-radius) {
+	-webkit-border-radius: @radius;
+	-moz-border-radius: @radius;
+	border-radius: @radius;
+}
+.appearance (@appearance) {
+	-webkit-appearance: @appearance;
+	-moz-appearance: @appearance;
+	appearance: @appearance;
+}
+.transform (@transform) {
+	-webkit-transform: @transform;
+	-moz-transform: @transform;
+	transform: @transform;
+}
+.transform-origin (@origin) {
+	-webkit-transform-origin: @origin;
+	-moz-transform-origin: @origin;
+	transform-origin: @origin;
+}
+.transition (@transition) {
+	-webkit-transition: @transition;
+	-moz-transition: @transition;
+	transition: @transition;
+}
+.select (@type: text) {
+	-webkit-touch-callout: @type;
+	-webkit-user-select: @type;
+	-moz-user-select: @type;
+	-ms-user-select: @type;
+	user-select: @type;
+}
+.select (@type: text) when (@type = none) {
+	cursor: default;
+}
+.box-shadow (@shadow) {
+	-webkit-box-shadow: @shadow;
+	-moz-box-shadow: @shadow;
+	-ms-box-shadow: @shadow;
+	box-shadow: @shadow;
+}
+.translatex (@value: 0px) {
+	-webkit-transform: translatex(@value);
+	transform: translatex(@value);
+}
+.translatey (@value: 0px) {
+	-webkit-transform: translatey(@value);
+	transform: translatey(@value);
+}
+.translatexy (@valuex: 0px, @valuey: 0px) {
+	-webkit-transform: translatex(@valuex) translatey(@valuey);
+	transform: translatex(@valuex) translatey(@valuey);
+}
+.translatexyz (@valuex: 0px, @valuey: 0px, @valuez: 0px) {
+	-webkit-transform: translatex(@valuex) translatey(@valuey) translatez(@valuez);
+	transform: translatex(@valuex) translatey(@valuey) translatez(@valuez);
+}

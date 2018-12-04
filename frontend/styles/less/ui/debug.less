@@ -1,0 +1,62 @@
+aside {
+	&.debug {
+		position: fixed;
+		z-index: 1000000;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.8);
+		color: #fff;
+		font-size: 12px;
+		line-height: 20px;
+		overflow: auto;
+		max-height: 30vh;
+		.select(text);
+		>h6 {
+			padding: 5px 20px;
+			background: rgba(0, 0, 0, 0.6);
+			&.exception {
+				background: rgba(255, 0, 0, 0.6);
+			}
+		}
+		>pre {
+			font-size: 12px;
+			padding: 5px 20px;
+			white-space: pre;
+			&.exception {
+				color: rgba(255, 255, 255, 0.6);
+			}
+		}
+		>p {
+			padding: 5px 20px;
+		}
+		>.log {
+			table-layout: fixed;
+			td {
+				padding: 5px 20px;
+				vertical-align: top;
+				>.text {
+					white-space: pre;
+					font: 12px @mono-font;
+					display: block;
+					color: #fff;
+				}
+				>.info {
+					font-size: 10px;
+					color: rgba(255, 255, 255, 0.6);
+				}
+			}
+		}
+		&::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+			background: rgba(0, 0, 0, 0.6);
+		}
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.4);
+			&:hover {
+				background: #fff;
+			}
+		}
+	}
+}
