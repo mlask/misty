@@ -57,9 +57,8 @@ class i18n
 	
 	/* ---------- Funkcje publiczne ---------- */
 	
-	public function _ ($input, $lang = false)
+	public function _ (...$a)
 	{
-		$a = func_get_args();
 		$l = [
 			'label'	=> (count($a) > 0 ? array_shift($a) : null),
 			'lang'	=> (count($a) > 0 ? array_shift($a) : null) ?: $this->lang
@@ -67,9 +66,8 @@ class i18n
 		return $l['lang'] === null ? $this->_cleanup($l['label']) : (isset($this->data[$l['lang']][$l['label']]) ? $this->data[$l['lang']][$l['label']] : $this->_cleanup($l['label']));
 	}
 	
-	public function _s ()
+	public function _s (...$a)
 	{
-		$a = func_get_args();
 		$l = [
 			'label'	=> (count($a) > 0 ? array_shift($a) : null),
 			'lang'	=> ($this->lang),
@@ -78,9 +76,8 @@ class i18n
 		return vsprintf($l['lang'] === null ? $this->_cleanup($l['label']) : (isset($this->data[$l['lang']][$l['label']]) ? $this->data[$l['lang']][$l['label']] : $this->_cleanup($l['label'])), $l['vars']);
 	}
 	
-	public function _sl ()
+	public function _sl (...$a)
 	{
-		$a = func_get_args();
 		$l = [
 			'label'	=> (count($a) > 0 ? array_shift($a) : null),
 			'lang'	=> (count($a) > 0 ? array_shift($a) : null) ?: $this->lang,

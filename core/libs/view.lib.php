@@ -156,9 +156,9 @@ class view_functions
 		return sprintf('%0d:%02d:%02d', $i = floor($s / 3600), floor(($s - ($i * 3600)) / 60) % 60, $s % 60);
 	}
 	
-	public function set_class ()
+	public function set_class (...$args)
 	{
-		$pair = array_chunk(func_get_args(), 2);
+		$pair = array_chunk($args, 2);
 		$outc = [];
 		foreach ($pair as $_p)
 			if ((bool)$_p[0] === true)
