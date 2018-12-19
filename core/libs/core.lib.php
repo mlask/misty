@@ -45,7 +45,9 @@ class core
 	{
 		if (file_exists(self::$env['path']['absolute'] . '/core/config/config.php'))
 		{
+			ob_start();
 			$config = include(self::$env['path']['absolute'] . '/core/config/config.php');
+			ob_end_clean();
 			if (isset($config[$key]))
 				return $config[$key];
 		}
@@ -99,9 +101,8 @@ class core
 	private function _autoload ($name, $ext = null)
 	{
 		// wyszukanie pliku w bibliotekach
-		if (file_exists($n = sprintf('%s/core/libs/%s.lib.php', self::$env['path']['absolute'], $name)))
-			require_once($n);
-		elseif (file_exists($n = sprintf('%s/core/models/%s.model.php', self::$env['path']['absolute'], basename($name, '_model'))))
+		if (file_exists($n = sprintf('%s/core/libs/%s.lib.php', self::$env['path']['absolute'], $name)) ||
+			file_exists($n = sprintf('%s/core/models/%s.model.php', self::$env['path']['absolute'], basename($name, '_model'))))
 			require_once($n);
 	}
 	
