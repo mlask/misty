@@ -102,7 +102,9 @@ class core
 	{
 		// wyszukanie pliku w bibliotekach
 		if (file_exists($n = sprintf('%s/core/libs/%s.lib.php', self::$env['path']['absolute'], $name)) ||
-			file_exists($n = sprintf('%s/core/models/%s.model.php', self::$env['path']['absolute'], basename($name, '_model'))))
+			file_exists($n = sprintf('%s/core/models/%s.model.php', self::$env['path']['absolute'], basename($name, '_model'))) ||
+			/* PSR-0 */file_exists($n = sprintf('%s/core/libs/%s.php', self::$env['path']['absolute'], strtr(preg_replace('/^(.+)\\\(.+?)_(.+?)$/', '\1/\2/\3', $name), '\\', '/'))) ||
+			/* PSR-4 */file_exists($n = sprintf('%s/core/libs/%s.php', self::$env['path']['absolute'], strtr($name, '\\', '/'))))
 			require_once($n);
 	}
 	
