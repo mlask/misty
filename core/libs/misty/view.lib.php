@@ -1,15 +1,15 @@
 <?php
-require_once('Rain/autoload.php');
-use Rain\Tpl;
-
+namespace misty;
 class view
 {
-	const page = 'content_page';
-	const menu = 'content_menu';
+	const PAGE = 'content_page';
+	const MENU = 'content_menu';
 	
 	private static $instance = null;
-	private $tpl = null;
+	private $twig = null;
+	private $vars = null;
 	private $stack = null;
+	private $loader = null;
 	
 	public static function init ()
 	{
@@ -18,25 +18,16 @@ class view
 		return self::$instance;
 	}
 	
-	/* ---------- Obsługa zmiennych i powiadomień ---------- */
-	
 	public function assign ($variable, $value = null)
 	{
-		$this->tpl->assign($variable, $value);
+		if (is_array($variable) && $value === null)
+		{
+			foreach ($variable as $name => $value)
+				$this->vars[$name] = $value;
+		}
+		else
+			$this->vars[$variable] = $value;
 	}
-	
-	public function message ($class, $text, $delay = false)
-	{
-		session_start();
-		$_SESSION['viewmsg'] = [
-			'class'	=> $class,
-			'text'	=> $text,
-			'delay'	=> $delay
-		];
-		session_write_close();
-	}
-	
-	/* ---------- Obsługa widoków ---------- */
 	
 	public function display ($view, $module = null, $target = null)
 	{
@@ -105,20 +96,34 @@ class view
 	
 	/* ---------- Funkcje prywatne ---------- */
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	private function __construct ()
 	{
-		// usunięcie starych plików
-		foreach (glob(core::env()->path->cache . '/' . core::env()->path->workspace . '/views/*.rtpl.php') as $rt)
-		{
-			if (filemtime($rt) < time() - 3600)
-			{
-				core::log('view cache removed: ' . $rt);
-				unlink($rt);
-			}
-		}
+		// default loader for workspace views
+		$this->loader = new \Twig\Loader\FilesystemLoader(core::env()->path->absolute . '/' . core::env()->path->workspace . '/views');
 		
-		// utworzenie instancji
-		session_start();
+		// initialize Twig
+		$this->twig = new \Twig\Environment($this->loader, [
+			'debug'			=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
+			'cache'			=> core::env()->path->cache . '/views',
+		]);
+		
+		/*
 		if (!core::env()->request->getd('debug', false, request::type_bool))
 			Tpl::registerPlugin(new Tpl\Plugin\Cleanup);
 		Tpl::configure([
@@ -141,6 +146,7 @@ class view
 			unset($_SESSION['viewmsg']);
 		}
 		session_write_close();
+		*/
 	}
 }
 

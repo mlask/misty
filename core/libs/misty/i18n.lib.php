@@ -1,4 +1,5 @@
 <?php
+namespace misty;
 class i18n
 {
 	const default_lang = null;
@@ -92,7 +93,7 @@ class i18n
 	{
 		$this->lang = self::default_lang ?: self::detect(true);
 		$this->_reload();
-		core::log('initialized i18n with language set to: ' . $this->lang);
+		core::log('initialized i18n with language set to: %s', $this->lang);
 	}
 	
 	private function _cleanup ($input)
@@ -114,7 +115,7 @@ class i18n
 				{
 					$this->cache[md5($lang)] = $lang;
 					$this->data[basename($lang, '.lang.php')] = $ltmp;
-					core::log('loaded global i18n file: ' . $lang);
+					core::log('loaded global i18n file: %s', $lang);
 				}
 				$ltmp = null;
 			}
@@ -132,7 +133,7 @@ class i18n
 					{
 						$this->cache[md5($lang)] = $lang;
 						$this->data[basename($lang, '.lang.php')] = isset($this->data[basename($lang, '.lang.php')]) ? array_merge($this->data[basename($lang, '.lang.php')], $ltmp) : $ltmp;
-						core::log('loaded instance i18n file: ' . $lang);
+						core::log('loaded instance i18n file: %s', $lang);
 					}
 					$ltmp = null;
 				}

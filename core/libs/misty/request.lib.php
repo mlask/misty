@@ -1,9 +1,10 @@
 <?php
+namespace misty;
 class request
 {
-	const type_bool = 0;
-	const type_int = 1;
-	const type_array = 2;
+	const TYPE_BOOL = 0;
+	const TYPE_INT = 1;
+	const TYPE_ARRAY = 2;
 	
 	private $req = null;
 	private $routes = null;
@@ -52,15 +53,15 @@ class request
 					{
 						switch ($params[2])
 						{
-							case self::type_bool:
+							case self::TYPE_BOOL:
 								$_o = preg_match('/^(true|yes|y)$/i', $_o) ? true : (preg_match('/^(false|no|n)$/i', $_o) ? false : (bool)(int)$_o);
 								break;
 							
-							case self::type_int:
+							case self::TYPE_INT:
 								$_o = (int)$_o;
 								break;
 							
-							case self::type_array:
+							case self::TYPE_ARRAY:
 								$_o = explode(',', preg_replace('/\s+/', '', $_o));
 								break;
 						}
