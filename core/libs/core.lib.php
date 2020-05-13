@@ -34,8 +34,7 @@ class core
 			'cli'		=> php_sapi_name() === 'cli',
 			'config'	=> null,
 			'request'	=> null,
-			'instance'	=> null,
-			'exception'	=> false
+			'instance'	=> null
 		]);
 		
 		// allow full access to env from workspace init
@@ -75,10 +74,10 @@ class core
 		if (count($message) > 0)
 		{
 			self::$log[] = [
-				microtime(true),
-				memory_get_usage(true),
-				debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0],
-				count($message) > 1 ? vsprintf(array_shift($message), $message) : array_shift($message)
+				'time'		=> microtime(true),
+				'memory'	=> memory_get_usage(true),
+				'callee'	=>debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0],
+				'message'	=> count($message) > 1 ? vsprintf(array_shift($message), $message) : array_shift($message)
 			];
 		}
 		return self::$log;

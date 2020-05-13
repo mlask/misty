@@ -10,7 +10,9 @@ class main_module extends module
 		print_r($this);
 		
 		// main module
-		$this->view->display('main', $this->_name);
-		$this->view->flush('index');
+		$this->view->assign([
+			'translate'	=> $this->i18n
+		]);
+		$this->view->display('@module/main.html');
 	}
 }

@@ -57,7 +57,7 @@ new class
 				'path'		=> dirname($_mm['file']),
 				'action'	=> core::env()->request->action($_mm['default']),
 				'params'	=> [],
-				'object'	=> $_mm['ref']->newInstance(['view' => view::init()])
+				'object'	=> $_mm['ref']->newInstance(['view' => new view])
 			]);
 			
 			if (!isset(core::env()->instance->object->__break) || core::env()->instance->object->__break === false)

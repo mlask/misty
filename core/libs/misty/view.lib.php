@@ -5,17 +5,23 @@ class view
 	const PAGE = 'content_page';
 	const MENU = 'content_menu';
 	
-	private static $instance = null;
-	private $twig = null;
+	private $i18n = null;
 	private $vars = null;
 	private $stack = null;
-	private $loader = null;
 	
-	public static function init ()
+	public function __construct ()
 	{
-		if (self::$instance === null)
-			self::$instance = new self;
-		return self::$instance;
+		ob_start();
+		$this->i18n = i18n::init();
+		
+		set_exception_handler(function ($exception) {
+			$this->vars['core_exception'][] = $exception;
+		});
+	}
+	
+	public function __destruct ()
+	{
+		$this->flush();
 	}
 	
 	public function assign ($variable, $value = null)
@@ -29,11 +35,12 @@ class view
 			$this->vars[$variable] = $value;
 	}
 	
-	public function display ($view, $module = null, $target = null)
+	public function display ($view, $target = null)
 	{
-		$this->stack[$target ?: 'content'][] = $module ? core::env()->path->absolute . '/' . core::env()->path->workspace . '/modules/' . $module . '/views/' . $view : $view;
+		$this->stack[$target ?: 'content'][] = $view;
 	}
 	
+	/*
 	public function display_single ($view, $module = null)
 	{
 		$this->tpl->draw(str_replace('.tpl', '', $module ? core::env()->path->absolute . '/' . core::env()->path->workspace . '/modules/' . $module . '/views/' . $view : $view));
@@ -48,9 +55,58 @@ class view
 	{
 		return $this->tpl->draw(str_replace('.tpl', '', $module ? core::env()->path->absolute . '/' . core::env()->path->workspace . '/modules/' . $module . '/views/' . $view : $view), true);
 	}
+	*/
 	
-	public function flush ($view = 'index')
+	public function flush ($view = 'index.html')
 	{
+		// default loader for workspace views
+		$loader = new \Twig\Loader\FilesystemLoader(core::env()->path->absolute . '/' . core::env()->path->workspace . '/views');
+		
+		// module views
+		if (isset(core::env()->instance))
+			$loader->addPath(core::env()->instance->path . '/views', 'module');
+		
+		// initialize Twig
+		$twig = new \Twig\Environment($loader, [
+			'debug'			=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
+			'cache'			=> core::env()->path->cache . '/views',
+		]);
+		
+		// filters
+		$twig->addFunction(new \Twig\TwigFunction('_', [$this->i18n, '_']));
+		$twig->addFunction(new \Twig\TwigFunction('_s', [$this->i18n, '_s']));
+		$twig->addFunction(new \Twig\TwigFunction('_sl', [$this->i18n, '_sl']));
+		
+		// global vars
+		$this->vars['core_env'] = core::env();
+		$this->vars['core_log'] = core::log();
+		$this->vars['core_debug'] = core::env()->request->getd('debug', false, request::TYPE_BOOL);
+		$this->vars['core_buffer'] = ob_get_contents();
+		
+		// output vars
+		$vars = is_array($this->vars) ? $this->vars : [];
+		
+		if (is_array($this->stack))
+		{
+			foreach ($this->stack as $target => $views)
+			{
+				foreach ($views as $template)
+				{
+					if (!isset($vars['view'][$target]))
+						$vars['view'][$target] = '';
+					
+					$vars['view'][$target] .= $twig->render($template, is_array($this->vars) ? $this->vars : []);
+				}
+			}
+		}
+		
+		ob_end_clean();
+		
+		$twig->display($view, $vars);
+		/*
+		
+		
+		
 		try
 		{
 			$stack_content = null;
@@ -77,6 +133,7 @@ class view
 			], null, true);
 		}
 		$this->tpl->draw(str_replace('.tpl', '', $view));
+		*/
 	}
 	
 	public function clear ($target = null)
@@ -112,42 +169,7 @@ class view
 	
 	
 	
-	private function __construct ()
-	{
-		// default loader for workspace views
-		$this->loader = new \Twig\Loader\FilesystemLoader(core::env()->path->absolute . '/' . core::env()->path->workspace . '/views');
-		
-		// initialize Twig
-		$this->twig = new \Twig\Environment($this->loader, [
-			'debug'			=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
-			'cache'			=> core::env()->path->cache . '/views',
-		]);
-		
-		/*
-		if (!core::env()->request->getd('debug', false, request::type_bool))
-			Tpl::registerPlugin(new Tpl\Plugin\Cleanup);
-		Tpl::configure([
-			'tpl_ext'			=> 'tpl',
-			'tpl_dir'			=> core::env()->path->absolute . '/' . core::env()->path->workspace . '/views/',
-			'cache_dir'			=> core::env()->path->cache . '/views/',
-			'sandbox'			=> false,
-			'remove_comments'	=> true,
-			'debug'				=> core::env()->request->getd('debug', false, request::type_bool)
-		]);
-		$this->tpl = new Tpl;
-		$this->tpl->assign([
-			'vf'		=> new view_functions,
-			'viewmsg'	=> isset($_SESSION['viewmsg']) ? $_SESSION['viewmsg'] : false,
-			'translate'	=> i18n::init()
-		]);
-		if (isset($_SESSION['viewmsg']))
-		{
-			$_SESSION['viewmsg'] = null;
-			unset($_SESSION['viewmsg']);
-		}
-		session_write_close();
-		*/
-	}
+	
 }
 
 class view_functions

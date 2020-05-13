@@ -5,21 +5,21 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<base href="{$core->env->path->relative|rtrim:"/"}/" />
 	<title>misty³</title>
-	{if="$core->env->local"}
+	{% if core_env.local %}
 	<link rel="stylesheet/less" type="text/css" href="frontend/styles/less/app.less" />
 	<script src="//cdnjs.cloudflare.com/ajax/libs/less.js/2.2.0/less.min.js" data-env="development"></script>
-	{else}
+	{% else %}
 	<link rel="stylesheet" href="frontend/styles/app.css" />
-	{/if}
+	{% endif %}
 </head>
-<body data-layout="{$core->env->instance->name}">
-	{if="isset($view) && $view.content"}
+<body data-layout="{{ core_env.instance.name }}">
+	{% if view.content %}
 	<div id="app-content">
-	{$view.content|safe}
+	{{ view.content|raw }}
 	</div>
-	{/if}
-	{if="$core->debug"}
-	{include="debug"}
-	{/if}
+	{% endif %}
+	{% if core_debug %}
+	{% include('debug.html') %}
+	{% endif %}
 </body>
 </html>

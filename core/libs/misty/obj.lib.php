@@ -54,4 +54,9 @@ class obj
 		if (isset($this->data[$name]) && is_callable($this->data[$name]))
 			$this->data[$name](...$arguments);
 	}
+	
+	public function __isset ($name)
+	{
+		return isset($this->data[$name]);
+	}
 }

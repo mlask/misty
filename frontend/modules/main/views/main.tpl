@@ -1,1 +1,0 @@
-{$translate->_('Hello, World!')} - {$translate->_('Main Module')}
