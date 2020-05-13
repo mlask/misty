@@ -123,7 +123,7 @@ class request
 				ob_end_clean();
 		
 		session_write_close();
-		header('Location: ' . ($addr === true ? (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['REQUEST_URI']) : (preg_match('/^http[s?]/', $addr) ? $addr : rtrim(core::env()['path']['relative'], '/') . '/' . ltrim($addr, '/'))));
+		header('Location: ' . ($addr === true ? (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['REQUEST_URI']) : (preg_match('/^http[s?]/', $addr) ? $addr : rtrim(core::env()->path->relative, '/') . '/' . ltrim($addr, '/'))));
 		exit;
 	}
 	
@@ -141,7 +141,7 @@ class request
 	private function __process ()
 	{
 		// przygotowanie danych źródłowych
-		if (core::env()['cli'])
+		if (core::env()->cli)
 		{
 			$self = array_shift($_SERVER['argv']);
 			$qs = [implode('/', $_SERVER['argv'])];

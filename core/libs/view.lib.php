@@ -40,12 +40,12 @@ class view
 	
 	public function display ($view, $module = null, $target = null)
 	{
-		$this->stack[$target ?: 'content'][] = $module ? core::env()['path']['absolute'] . '/' . core::env()['path']['workspace'] . '/modules/' . $module . '/views/' . $view : $view;
+		$this->stack[$target ?: 'content'][] = $module ? core::env()->path->absolute . '/' . core::env()->path->workspace . '/modules/' . $module . '/views/' . $view : $view;
 	}
 	
 	public function display_single ($view, $module = null)
 	{
-		$this->tpl->draw(str_replace('.tpl', '', $module ? core::env()['path']['absolute'] . '/' . core::env()['path']['workspace'] . '/modules/' . $module . '/views/' . $view : $view));
+		$this->tpl->draw(str_replace('.tpl', '', $module ? core::env()->path->absolute . '/' . core::env()->path->workspace . '/modules/' . $module . '/views/' . $view : $view));
 	}
 	
 	public function fetch ($view)
@@ -55,7 +55,7 @@ class view
 	
 	public function fetch_mod ($view, $module = null)
 	{
-		return $this->tpl->draw(str_replace('.tpl', '', $module ? core::env()['path']['absolute'] . '/' . core::env()['path']['workspace'] . '/modules/' . $module . '/views/' . $view : $view), true);
+		return $this->tpl->draw(str_replace('.tpl', '', $module ? core::env()->path->absolute . '/' . core::env()->path->workspace . '/modules/' . $module . '/views/' . $view : $view), true);
 	}
 	
 	public function flush ($view = 'index')
@@ -108,7 +108,7 @@ class view
 	private function __construct ()
 	{
 		// usunięcie starych plików
-		foreach (glob(core::env()['path']['cache'] . '/' . core::env()['path']['workspace'] . '/views/*.rtpl.php') as $rt)
+		foreach (glob(core::env()->path->cache . '/' . core::env()->path->workspace . '/views/*.rtpl.php') as $rt)
 		{
 			if (filemtime($rt) < time() - 3600)
 			{
@@ -119,15 +119,15 @@ class view
 		
 		// utworzenie instancji
 		session_start();
-		if (!core::env()['request']->getd('debug', false, request::type_bool))
+		if (!core::env()->request->getd('debug', false, request::type_bool))
 			Tpl::registerPlugin(new Tpl\Plugin\Cleanup);
 		Tpl::configure([
 			'tpl_ext'			=> 'tpl',
-			'tpl_dir'			=> core::env()['path']['absolute'] . '/' . core::env()['path']['workspace'] . '/views/',
-			'cache_dir'			=> core::env()['path']['cache'] . '/views/',
+			'tpl_dir'			=> core::env()->path->absolute . '/' . core::env()->path->workspace . '/views/',
+			'cache_dir'			=> core::env()->path->cache . '/views/',
 			'sandbox'			=> false,
 			'remove_comments'	=> true,
-			'debug'				=> core::env()['request']->getd('debug', false, request::type_bool)
+			'debug'				=> core::env()->request->getd('debug', false, request::type_bool)
 		]);
 		$this->tpl = new Tpl;
 		$this->tpl->assign([

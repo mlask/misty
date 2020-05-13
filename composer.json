@@ -1,0 +1,9 @@
+{
+    "config": {
+        "vendor-dir": "core/libs/vendor",
+        "htaccess-protect": false
+    },
+    "require": {
+        "twig/twig": "^3.0"
+    }
+}

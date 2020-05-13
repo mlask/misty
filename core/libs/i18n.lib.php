@@ -105,7 +105,7 @@ class i18n
 	protected function _reload ()
 	{
 		// globalne pliki językowe
-		foreach (glob(core::env()['path']['core'] . '/i18n/*.lang.php') as $lang)
+		foreach (glob(core::env()->path->core . '/i18n/*.lang.php') as $lang)
 		{
 			if (!isset($this->cache[md5($lang)]))
 			{
@@ -121,9 +121,9 @@ class i18n
 		}
 		
 		// pliki językowe aktualnego modułu
-		if (core::env()['instance'])
+		if (core::env()->instance)
 		{
-			foreach (glob(dirname(core::env()['instance']['file']) . '/i18n/*.lang.php') as $lang)
+			foreach (glob(dirname(core::env()->instance->file) . '/i18n/*.lang.php') as $lang)
 			{
 				if (!isset($this->cache[md5($lang)]))
 				{

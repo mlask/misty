@@ -13,7 +13,7 @@ class module
 		// środowisko
 		$this->env = core::env();
 		$this->i18n = i18n::init();
-		if (!$this->env['cli'])
+		if (!$this->env->cli)
 			$this->view = view::init();
 		
 		// funkcja inicjalizująca
