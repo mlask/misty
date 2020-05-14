@@ -2,128 +2,92 @@
 namespace misty;
 class request
 {
-	const TYPE_BOOL = 0;
-	const TYPE_INT = 1;
+	const TYPE_INT = 0;
+	const TYPE_BOOL = 1;
 	const TYPE_ARRAY = 2;
 	
-	private $req = null;
+	public $xhr = null;
+	public $self = null;
 	private $routes = null;
+	private $req_get = null;
+	private $req_both = null;
+	private $req_call = null;
+	private $req_post = null;
 	
 	public function __construct ()
 	{
-		$this->__process();
+		$this->_process();
 	}
 	
-	public function __call ($action, array $params = null)
+	public function __get ($name)
 	{
-		switch (strtolower($action))
+		return isset($this->req_get[$name]) ? $this->req_get[$name] : null;
+	}
+	
+	public function __call ($name, array $args = null)
+	{
+		return isset($this->req_call->{$name}) && !is_object($this->req_call->{$name}) ? $this->req_call->{$name} : (!empty($args) ? array_shift($args) : null);
+	}
+	
+	public function __isset ($name)
+	{
+		return isset($this->req_get[$name]);
+	}
+	
+	public function any (...$args)
+	{
+		return $this->_get_req('both', ...$args);
+	}
+	
+	public function get (...$args)
+	{
+		return $this->_get_req('get', ...$args);
+	}
+	
+	public function post (...$args)
+	{
+		return $this->_get_req('post', ...$args);
+	}
+	
+	public function anyd (...$args)
+	{
+		return $this->_get_req_d('both', ...$args);
+	}
+	
+	public function getd (...$args)
+	{
+		return $this->_get_req_d('get', ...$args);
+	}
+	
+	public function postd (...$args)
+	{
+		return $this->_get_req_d('post', ...$args);
+	}
+	
+	public function param ($name, $default = null)
+	{
+		return isset($this->req_call->nparam->{$name}) ? $this->req_call->nparam->{$name} : (isset($this->req_call->params->{$name}) ? $this->req_call->params->{$name} : $default);
+	}
+	
+	public function params (...$args)
+	{
+		$output = null;
+		if (is_array($args) && !empty($args))
 		{
-			case 'param':
-			{
-				if (!empty($params))
-					return isset($this->req['call_nparam'][$params[0]]) ? $this->req['call_nparam'][$params[0]] : (isset($this->req['call_params'][$params[0]]) ? $this->req['call_params'][$params[0]] : (isset($params[1]) ? $params[1] : null));
-				break;
-			}
-			case 'params':
-			{
-				$_o = null;
-				if (!empty($params))
-				{
-					foreach ($params as $_p)
-					{
-						if (is_array($_p))
-						{
-							foreach ($_p as $_pk => $_pd)
-								$_o[$_pk] = isset($this->req['call_nparam'][$_pk]) ? $this->req['call_nparam'][$_pk] : (isset($this->req['call_params'][$_pk]) ? $this->req['call_params'][$_pk] : $_pd);
-						}
-						else
-						{
-							$_o[$_p] = isset($this->req['call_nparam'][$_p]) ? $this->req['call_nparam'][$_p] : (isset($this->req['call_params'][$_p]) ? $this->req['call_params'][$_p] : null);
-						}
-					}
-				}
-				return $_o;
-				break;
-			}
-			case 'getd':
-			case 'postd':
-			case 'getpostd':
-			{
-				if (!empty($params))
-				{
-					$_o = isset($this->req[substr($action, 0, -1)][$params[0]]) ? $this->req[substr($action, 0, -1)][$params[0]] : (isset($params[1]) ? $params[1] : null);
-					if ($_o !== null && isset($params[2]) && $params[2] !== null)
-					{
-						switch ($params[2])
-						{
-							case self::TYPE_BOOL:
-								$_o = preg_match('/^(true|yes|y)$/i', $_o) ? true : (preg_match('/^(false|no|n)$/i', $_o) ? false : (bool)(int)$_o);
-								break;
-							
-							case self::TYPE_INT:
-								$_o = (int)$_o;
-								break;
-							
-							case self::TYPE_ARRAY:
-								$_o = explode(',', preg_replace('/\s+/', '', $_o));
-								break;
-						}
-					}
-					return $_o;
-				}
-				break;
-			}
-			case 'get':
-			case 'post':
-			case 'getpost':
-			{
-				$_o = null;
-				if (!empty($params))
-				{
-					foreach ($params as $_p)
-					{
-						if (is_array($_p))
-						{
-							foreach ($_p as $_pk => $_pd)
-								$_o[$_pk] = isset($this->req[$action][$_pk]) ? $this->req[$action][$_pk] : $_pd;
-						}
-						else
-						{
-							$_o[$_p] = isset($this->req[$action][$_p]) ? $this->req[$action][$_p] : null;
-						}
-					}
-				}
-				return $_o;
-				break;
-			}
-			default:
-			{
-				if (isset($this->req['call_' . $action]))
-					return $this->req['call_' . $action];
-				elseif (!empty($params))
-					return array_shift($params);
-			}
+			foreach ($args as $arg)
+				$output[$name] = is_array($arg) ? $this->param(array_shift($arg), array_shift($arg)) : $this->param($arg);
 		}
-		return null;
+		else
+		{
+			$output = [
+				'_by_idx'	=> $this->req_call->params->get(),
+				'_by_name'	=> $this->req_call->nparam->get()
+			];
+		}
+		return $output;
 	}
 	
-	public function __get ($param)
-	{
-		if ($param == 'self')
-			return $this->req['self'];
-		elseif ($param == 'xhr')
-			return $this->req['xhr'];
-		if (isset($this->req['get'][$param]))
-			return $this->req['get'][$param];
-		return null;
-	}
-	
-	public function __isset ($param)
-	{
-		return isset($this->req['get'][$param]);
-	}
-	
-	public function _redirect ($addr = '')
+	public function redirect ($addr = '')
 	{
 		while (ob_get_level())
 			ob_end_clean();
@@ -133,93 +97,146 @@ class request
 		exit;
 	}
 	
-	public function _add_route (array $route)
+	public function add_route (array $route)
 	{
 		$this->routes = array_merge((array)$this->routes, $route);
-		$this->__process();
+		$this->_process();
 	}
 	
-	public function _set (array $reqdata)
+	private function _process ()
 	{
-		$this->req = array_merge($this->req, $reqdata);
-	}
-	
-	private function __process ()
-	{
-		// przygotowanie danych źródłowych
+		// request arguments
 		if (core::env()->cli)
 		{
-			$self = array_shift($_SERVER['argv']);
-			$qs = [implode('/', $_SERVER['argv'])];
+			$this->self = array_shift($_SERVER['argv']);
+			$query_args = [implode('/', $_SERVER['argv'])];
 		}
 		else
 		{
-			$self = $_SERVER['REQUEST_URI'];
-			$qs = explode('?', $_SERVER['REQUEST_URI'], 3);
-			if (!empty($qs))
-				$qs[0] = substr(urldecode($qs[0]), strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/')) + 1);
+			$this->self = $_SERVER['REQUEST_URI'];
+			$query_args = explode('?', $_SERVER['REQUEST_URI'], 3);
+			if (!empty($query_args))
+				$query_args[0] = substr(urldecode($query_args[0]), strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/')) + 1);
 		}
 		
-		// zapisanie podstawowego requestu
-		$this->req = [
-			'self'		=> $self,
-			'query'		=> !empty($qs) ? array_shift($qs) : null,
-			'params'	=> !empty($qs) ? array_shift($qs) : null,
-			'get'		=> null,
-			'post'		=> null,
-			'getpost'	=> null,
-			'xhr'		=> isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest'
-		];
+		// xmlhttprequest
+		$this->xhr = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 		
-		// zastosowanie routerów
-		if (!empty($this->routes))
+		// request
+		$this->query = !empty($query_args) ? array_shift($query_args) : null;
+		$this->params = !empty($query_args) ? array_shift($query_args) : null;
+		
+		// routes
+		if (is_array($this->routes) && !empty($this->routes))
 		{
 			core::log('%d route(s) found', count($this->routes));
 			foreach ($this->routes as $r_from => $r_to)
 			{
-				if (preg_match($r_from, $this->req['query']))
-					$this->req['query'] = preg_replace($r_from, $r_to, $this->req['query']);
+				if (preg_match($r_from, $this->query))
+					$this->query = preg_replace($r_from, $r_to, $this->query);
 			}
 		}
 		
-		// moduł, akcja
-		if ($this->req['query'] !== null && strlen($this->req['query']) > 0)
+		// module, action, params...
+		if ($this->query !== null && strlen($this->query) > 0)
 		{
-			$this->req['call'] = explode('/', trim($this->req['query'], '\/'));
-			$this->req['call_module'] = !empty($this->req['call']) && preg_match('/^[a-z0-9_-]+$/i', $this->req['call'][0]) ? str_replace('-', '_', array_shift($this->req['call'])) : null;
-			$this->req['call_action'] = !empty($this->req['call']) && preg_match('/^[a-z0-9_-]+$/i', $this->req['call'][0]) ? str_replace('-', '_', array_shift($this->req['call'])) : null;
-			$this->req['call_params'] = !empty($this->req['call']) ? $this->req['call'] : [];
-			$this->req['call_nparam'] = [];
-				
-			foreach ($this->req['call_params'] as $_pi => $_pp)
+			$call = explode('/', trim($this->query, '\/'));
+			$this->req_call = new obj([
+				'module'	=> !empty($call) && preg_match('/^[a-z0-9_-]+$/i', $call[0]) ? str_replace('-', '_', array_shift($call)) : null,
+				'action'	=> !empty($call) && preg_match('/^[a-z0-9_-]+$/i', $call[0]) ? str_replace('-', '_', array_shift($call)) : null,
+				'params'	=> new obj(!empty($call) ? $call : []),
+				'nparam'	=> new obj
+			]);
+			
+			foreach ($this->req_call->params->get() as $_pi => $_pp)
 			{
 				if (preg_match('/^([a-z0-9_]+?):(.+?)$/', $_pp, $_pm))
 				{
-					$this->req['call_nparam'][$_pm[1]] = $_pm[2];
-					unset($this->req['call_params'][$_pi]);
+					$this->req_call->nparam->{$_pm[1]}	 = $_pm[2];
+					unset($this->req_call->params->{$_pi});
 				}
 			}
 			
-			$this->req['call_params'] = array_values($this->req['call_params']);
-			$this->req['call'] = null;
-			unset($this->req['call']);
+			$this->req_call->params->reindex();
+		}
+		else
+		{
+			$this->req_call = new obj([
+				'module'	=> null,
+				'action'	=> null,
+				'params'	=> new obj,
+				'nparam'	=> new obj
+			]);
 		}
 		
-		// parametry (get, post)
-		if ($this->req['params'] !== null)
-			parse_str($this->req['params'], $this->req['get']);
+		// request parameters
+		if ($this->params !== null)
+		{
+			parse_str($this->params, $this->req_get);
+			$this->req_both = $this->req_get;
+		}
 		if (isset($_POST) && !empty($_POST))
+		{
 			foreach ($_POST as $_pk => $_pv)
-				$this->req['post'][$_pk] = $_pv;
-		if (is_array($this->req['post']))
-			foreach ($this->req['post'] as $_pk => $_pv)
-				$this->req['getpost'][$_pk] = $_pv;
-		if (is_array($this->req['get']))
-			foreach ($this->req['get'] as $_gk => $_gv)
-				$this->req['getpost'][$_gk] = $_gv;
+			{
+				$this->req_post[$_pk] = $_pv;
+				$this->req_both[$_pk] = $_pv;
+			}
+		}
 		
 		// porządki
 		$qs = null;
 		unset($qs);
+	}
+	
+	private function _get_req ($type, ...$args)
+	{
+		$output = null;
+		if (is_array($args) && !empty($args))
+		{
+			foreach ($args as $arg)
+			{
+				$arg_name = is_array($arg) ? array_shift($arg) : $arg;
+				$arg_def = is_array($arg) && !empty($arg) ? array_shift($arg) : null;
+				
+				$output[$name] = isset($this->{'req_' . $type}[$arg_name]) ? $this->{'req_' . $type}[$arg_name] : $arg_def;
+			}
+		}
+		return $output;
+	}
+	
+	private function _get_req_d ($type, ...$args)
+	{
+		if (is_array($args) && !empty($args))
+		{
+			$arg_name = array_shift($args);
+			$arg_def = !empty($args) ? array_shift($args) : null;
+			$arg_fmt = !empty($args) ? array_shift($args) : null;
+			
+			$value = isset($this->{'req_' . $type}[$arg_name]) ? $this->{'req_' . $type}[$arg_name] : $arg_def;
+			if ($value !== null && $arg_fmt !== null)
+			{
+				switch ($arg_fmt)
+				{
+					case self::TYPE_INT:
+					{
+						$value = (int)$value;
+						break;
+					}
+					case self::TYPE_BOOL:
+					{
+						$value = preg_match('/^(true|yes|y)$/i', $value) ? true : (preg_match('/^(false|no|n)$/i', $value) ? false : (bool)(int)$value);
+						break;
+					}
+					case self::TYPE_ARRAY:
+					{
+						$value = explode(',', preg_replace('/\s+/', '', $value));
+						break;
+					}
+				}
+			}
+			return $value;
+		}
+		return null;
 	}
 }

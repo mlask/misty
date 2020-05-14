@@ -67,7 +67,7 @@ class config
 			{
 				if (!isset($target->{strtolower($key)}))
 				{
-					$target->{strtolower($key)} = new stdclass;
+					$target->{strtolower($key)} = new \stdclass;
 					yield from $this->_config_map($value, $target->{strtolower($key)}, ($prefix !== null ? $prefix . '.' : '') . strtolower($key));
 				}
 			}

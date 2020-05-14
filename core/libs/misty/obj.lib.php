@@ -12,11 +12,9 @@ class obj
 		$this->set($data);
 	}
 	
-	public function allow ($file)
+	public function get ($flags = null)
 	{
-		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
-		if ($this->origin === $bt['file'])
-			$this->allow[] = $file;
+		return $this->data !== null ? $this->data : [];
 	}
 	
 	public function set (array $data = null)
@@ -26,9 +24,17 @@ class obj
 				$this->data[$key] = $value;
 	}
 	
-	public function get ($flags = null)
+	public function allow ($file)
 	{
-		return $this->data !== null ? $this->data : [];
+		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+		if ($this->origin === $bt['file'])
+			$this->allow[] = $file;
+	}
+	
+	public function reindex ()
+	{
+		if (is_array($this->data))
+			$this->data = array_values($this->data);
 	}
 	
 	public function __get ($name)
@@ -55,5 +61,11 @@ class obj
 	public function __isset ($name)
 	{
 		return isset($this->data[$name]);
+	}
+	
+	public function __unset ($name)
+	{
+		if (isset($this->data[$name]))
+			unset($this->data[$name]);
 	}
 }

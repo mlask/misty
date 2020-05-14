@@ -81,9 +81,7 @@ new class
 					if ($_mm['ref']->hasMethod(core::env()->instance->action))
 					{
 						$_me = $_mm['ref']->getMethod(core::env()->instance->action);
-						core::log('call %s::%s', $_mn, $_me->name);
-						
-						print_r($_me->getParameters());
+						core::log('call module "%s", action "%s" (args %s)', $_mn, $_me->name, json_encode(core::env()->request->params()));
 						
 						foreach ($_me->getParameters() as $_p)
 							core::env()->instance->params->{$_p->getPosition()} = 
