@@ -1,8 +1,8 @@
 <aside class="debug">
 	{if isset($core_exception)}
 	<h6 class="exception">Wyjątek</h6>
-	<p><strong>{$core_exception.message}</strong><br /><small>{$core_exception.file}@{$core_exception.line}</small></p>
-	<pre class="exception">{$core_exception.trace}</pre>
+	<p><strong>{$core_exception->getMessage()}</strong><br /><small>{$core_exception->getFile()}@{$core_exception->getLine()}</small></p>
+	<pre class="exception">{$core_exception->getTrace()|var_export:true}</pre>
 	{/if}
 	{if isset($core_buffer) && $core_buffer}
 	<h6>Bufor</h6>

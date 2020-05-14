@@ -8,8 +8,16 @@ class view
 	private $i18n = null;
 	private $stack = null;
 	private $smarty = null;
+	private static $instance = null;
 	
-	public function __construct ()
+	public static function init ()
+	{
+		if (self::$instance === null)
+			self::$instance = new self;
+		return self::$instance;
+	}
+	
+	private function __construct ()
 	{
 		$this->i18n = i18n::init();
 		
@@ -20,18 +28,48 @@ class view
 		$this->smarty->setConfigDir(core::env()->path->cache);
 		$this->smarty->setCacheDir(core::env()->path->cache);
 		
-		// exception handler
-		set_exception_handler(function ($exception) {
-			$this->smarty->assign('core_exception', $exception);
+		// custom modifiers
+		$this->smarty->registerPlugin('modifier', 'ftime', function ($input, $format = '%Y-%m-%d %H:%M:%S') {
+			return strftime($format, $input);
+		});
+		$this->smarty->registerPlugin('modifier', 'ftimes', function ($input) {
+			return sprintf('%0d:%02d:%02d', $i = floor($input / 3600), floor(($input - ($i * 3600)) / 60) % 60, $input % 60);
+		});
+		$this->smarty->registerPlugin('modifier', 'set_class', function (...$args) {
+			$pair = array_chunk($args, 2);
+			$outc = [];
+			foreach ($pair as $_p)
+				if ((bool)$_p[0] === true)
+					$outc[] = $_p[1];
+			if (!empty($outc))
+				return sprintf(' class="%s"', implode(' ', $outc));
+			return null;
+		});
+		
+		// convert errors to exceptions -- yes, `NOTICE` IS AN ERROR!
+		set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+			$errtype = [
+				E_ERROR => 'E_ERROR',
+				E_WARNING => 'E_WARNING',
+				E_PARSE => 'E_PARSE',
+				E_NOTICE => 'E_NOTICE',
+				E_CORE_ERROR => 'E_CORE_ERROR',
+				E_CORE_WARNING => 'E_CORE_WARNING',
+				E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+				E_COMPILE_WARNING => 'E_COMPILE_WARNING',
+				E_USER_ERROR => 'E_USER_ERROR',
+				E_USER_WARNING => 'E_USER_WARNING',
+				E_USER_NOTICE => 'E_USER_NOTICE',
+				E_STRICT => 'E_STRICT',
+				E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+				E_DEPRECATED => 'E_DEPRECATED',
+				E_USER_DEPRECATED => 'E_USER_DEPRECATED',
+			];
+			throw new exception(sprintf('%s: %s', $errtype[$errno], $errstr), $errfile, $errline);
 		});
 		
 		// enable output buffering
 		ob_start();
-	}
-	
-	public function __destruct ()
-	{
-		$this->flush();
 	}
 	
 	public function assign ($variable, $value = null)
@@ -39,43 +77,34 @@ class view
 		$this->smarty->assign($variable, $value);
 	}
 	
-	public function display ($view, $target = null)
+	public function render ($template, $target = null)
 	{
-		$this->stack[$target ?: 'content'][] = $view;
+		$this->stack[$target ?: 'content'][] = $template;
 	}
 	
-	/*
-	public function display_single ($view, $module = null)
+	public function display ($template)
 	{
-		$this->tpl->draw(str_replace('.tpl', '', $module ? core::env()->path->absolute . '/' . core::env()->path->workspace . '/modules/' . $module . '/views/' . $view : $view));
+		$this->_preflight();
+		
+		// disable output buffering
+		$this->smarty->assign('core_buffer', ob_get_contents());
+		ob_end_clean();
+		
+		// draw template
+		$this->smarty->display($template);
 	}
 	
-	public function fetch ($view)
+	public function fetch ($template)
 	{
-		return $this->tpl->draw(str_replace('.tpl', '', $view), true);
+		$this->_preflight();
+		
+		return $this->smarty->fetch($template);
 	}
-	
-	public function fetch_mod ($view, $module = null)
-	{
-		return $this->tpl->draw(str_replace('.tpl', '', $module ? core::env()->path->absolute . '/' . core::env()->path->workspace . '/modules/' . $module . '/views/' . $view : $view), true);
-	}
-	*/
 	
 	public function flush ($template = 'index.tpl')
 	{
 		$views = [];
-		
-		// module views
-		if (isset(core::env()->instance))
-			$this->smarty->addTemplateDir(core::env()->instance->path . '/views', 'module');
-		
-		// global variables
-		$this->smarty->assign([
-			'core_env'		=> core::env(),
-			'core_log'		=> core::log(),
-			'core_debug'	=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
-			'translate'		=> $this->i18n
-		]);
+		$this->_preflight();
 		
 		// view stack
 		if (is_array($this->stack) && !empty($this->stack))
@@ -181,40 +210,20 @@ class view
 		*/
 	}
 	
-	public function clear ($target = null)
+	private function _preflight ()
 	{
-		if ($target !== null)
-		{
-			$target = is_array($target) ? $target : array($target);
-			foreach ($target as $_target)
-			{
-				$this->stack[$_target] = null;
-				unset($this->stack[$_target]);
-			}
-		}
-		else
-			$this->stack = null;
+		// module views
+		if (isset(core::env()->instance))
+			$this->smarty->addTemplateDir(core::env()->instance->path . '/views', 'module');
+		
+		// global variables
+		$this->smarty->assign([
+			'core_env'		=> core::env(),
+			'core_log'		=> core::log(),
+			'core_debug'	=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
+			'translate'		=> $this->i18n
+		]);
 	}
-	
-	/* ---------- Funkcje prywatne ---------- */
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
 
 class view_functions

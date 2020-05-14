@@ -174,7 +174,7 @@ class request
 		// zastosowanie routerów
 		if (!empty($this->routes))
 		{
-			core::log(sprintf('%d route(s) found', count($this->routes)));
+			core::log('%d route(s) found', count($this->routes));
 			foreach ($this->routes as $r_from => $r_to)
 			{
 				if (preg_match($r_from, $this->req['query']))

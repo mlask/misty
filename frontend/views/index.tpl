@@ -12,7 +12,7 @@
 	<link rel="stylesheet" href="frontend/styles/app.css" />
 	{/if}
 </head>
-<body data-layout="{$core_env->instance->name}">
+<body data-layout="{if isset($core_env->instance)}{$core_env->instance->name}{/if}">
 	{if isset($core_view.content)}
 	<div id="app-content">
 	{$core_view.content}
