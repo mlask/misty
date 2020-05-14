@@ -28,7 +28,7 @@ class obj
 	
 	public function get ($flags = null)
 	{
-		return $this->data;
+		return $this->data !== null ? $this->data : [];
 	}
 	
 	public function __get ($name)
@@ -42,10 +42,7 @@ class obj
 	{
 		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
 		if ($this->origin !== $bt['file'] && ($this->allow === null || !in_array($bt['file'], $this->allow)))
-		{
-			print_r($this->allow);
 			throw new exception('Cannot modify collection outside it\'s origin', $bt['file'], $bt['line']);
-		}
 		$this->data[$name] = $value;
 	}
 	
