@@ -1,4 +1,5 @@
 <?php
+namespace misty;
 class db
 {
 	private static $instance = null;

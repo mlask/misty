@@ -1,4 +1,5 @@
 <?php
+namespace misty;
 class menu
 {
 	private $menu = null;

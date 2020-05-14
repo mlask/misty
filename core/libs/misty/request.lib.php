@@ -19,11 +19,13 @@ class request
 		switch (strtolower($action))
 		{
 			case 'param':
+			{
 				if (!empty($params))
 					return isset($this->req['call_nparam'][$params[0]]) ? $this->req['call_nparam'][$params[0]] : (isset($this->req['call_params'][$params[0]]) ? $this->req['call_params'][$params[0]] : (isset($params[1]) ? $params[1] : null));
 				break;
-				
+			}
 			case 'params':
+			{
 				$_o = null;
 				if (!empty($params))
 				{
@@ -42,10 +44,11 @@ class request
 				}
 				return $_o;
 				break;
-			
+			}
 			case 'getd':
 			case 'postd':
 			case 'getpostd':
+			{
 				if (!empty($params))
 				{
 					$_o = isset($this->req[substr($action, 0, -1)][$params[0]]) ? $this->req[substr($action, 0, -1)][$params[0]] : (isset($params[1]) ? $params[1] : null);
@@ -69,10 +72,11 @@ class request
 					return $_o;
 				}
 				break;
-			
+			}
 			case 'get':
 			case 'post':
 			case 'getpost':
+			{
 				$_o = null;
 				if (!empty($params))
 				{
@@ -91,12 +95,14 @@ class request
 				}
 				return $_o;
 				break;
-			
+			}
 			default:
+			{
 				if (isset($this->req['call_' . $action]))
 					return $this->req['call_' . $action];
 				elseif (!empty($params))
 					return array_shift($params);
+			}
 		}
 		return null;
 	}
@@ -119,9 +125,8 @@ class request
 	
 	public function _redirect ($addr = '')
 	{
-		if (ob_get_level() > 0)
-			while (ob_get_level() === 0)
-				ob_end_clean();
+		while (ob_get_level())
+			ob_end_clean();
 		
 		session_write_close();
 		header('Location: ' . ($addr === true ? (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['REQUEST_URI']) : (preg_match('/^http[s?]/', $addr) ? $addr : rtrim(core::env()->path->relative, '/') . '/' . ltrim($addr, '/'))));

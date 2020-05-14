@@ -1,4 +1,5 @@
 <?php
+namespace misty;
 class format
 {
 	public static function num ($num, array $text, $wn = false)

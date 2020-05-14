@@ -2,21 +2,31 @@
 namespace misty;
 class view
 {
-	const PAGE = 'content_page';
-	const MENU = 'content_menu';
+	const PAGE = 'page';
+	const MENU = 'menu';
 	
 	private $i18n = null;
-	private $vars = null;
 	private $stack = null;
+	private $smarty = null;
 	
 	public function __construct ()
 	{
-		ob_start();
 		$this->i18n = i18n::init();
 		
+		// Smarty engine
+		$this->smarty = new \Smarty;
+		$this->smarty->setTemplateDir(core::env()->path->absolute . '/' . core::env()->path->workspace . '/views/');
+		$this->smarty->setCompileDir(core::env()->path->cache);
+		$this->smarty->setConfigDir(core::env()->path->cache);
+		$this->smarty->setCacheDir(core::env()->path->cache);
+		
+		// exception handler
 		set_exception_handler(function ($exception) {
-			$this->vars['core_exception'][] = $exception;
+			$this->smarty->assign('core_exception', $exception);
 		});
+		
+		// enable output buffering
+		ob_start();
 	}
 	
 	public function __destruct ()
@@ -26,13 +36,7 @@ class view
 	
 	public function assign ($variable, $value = null)
 	{
-		if (is_array($variable) && $value === null)
-		{
-			foreach ($variable as $name => $value)
-				$this->vars[$name] = $value;
-		}
-		else
-			$this->vars[$variable] = $value;
+		$this->smarty->assign($variable, $value);
 	}
 	
 	public function display ($view, $target = null)
@@ -57,10 +61,50 @@ class view
 	}
 	*/
 	
-	public function flush ($view = 'index.html')
+	public function flush ($template = 'index.tpl')
 	{
-		// default loader for workspace views
-		$loader = new \Twig\Loader\FilesystemLoader(core::env()->path->absolute . '/' . core::env()->path->workspace . '/views');
+		$views = [];
+		
+		// module views
+		if (isset(core::env()->instance))
+			$this->smarty->addTemplateDir(core::env()->instance->path . '/views', 'module');
+		
+		// global variables
+		$this->smarty->assign([
+			'core_env'		=> core::env(),
+			'core_log'		=> core::log(),
+			'core_debug'	=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
+			'translate'		=> $this->i18n
+		]);
+		
+		// view stack
+		if (is_array($this->stack) && !empty($this->stack))
+		{
+			foreach ($this->stack as $target => $views)
+			{
+				foreach ($views as $view)
+				{
+					if (!isset($views[$target]))
+						$views[$target] = '';
+					$views[$target] .= $this->smarty->fetch($view);
+				}
+			}
+		}
+		
+		// output variables
+		$this->smarty->assign([
+			'core_view'		=> $views,
+			'core_buffer'	=> ob_get_contents()
+		]);
+		
+		// disable output buffering
+		ob_end_clean();
+		
+		// display output
+		$this->smarty->display($template);
+		
+		
+		/*
 		
 		// module views
 		if (isset(core::env()->instance))
@@ -103,6 +147,7 @@ class view
 		ob_end_clean();
 		
 		$twig->display($view, $vars);
+		*/
 		/*
 		
 		

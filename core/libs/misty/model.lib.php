@@ -1,4 +1,5 @@
 <?php
+namespace misty;
 class model
 {
 	public function __construct ()

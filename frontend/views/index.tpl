@@ -3,23 +3,23 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<base href="{$core->env->path->relative|rtrim:"/"}/" />
+	<base href="{$core_env->path->relative|rtrim:"/"}/" />
 	<title>misty³</title>
-	{% if core_env.local %}
+	{if $core_env->local}
 	<link rel="stylesheet/less" type="text/css" href="frontend/styles/less/app.less" />
 	<script src="//cdnjs.cloudflare.com/ajax/libs/less.js/2.2.0/less.min.js" data-env="development"></script>
-	{% else %}
+	{else}
 	<link rel="stylesheet" href="frontend/styles/app.css" />
-	{% endif %}
+	{/if}
 </head>
-<body data-layout="{{ core_env.instance.name }}">
-	{% if view.content %}
+<body data-layout="{$core_env->instance->name}">
+	{if isset($core_view.content)}
 	<div id="app-content">
-	{{ view.content|raw }}
+	{$core_view.content}
 	</div>
-	{% endif %}
-	{% if core_debug %}
-	{% include('debug.html') %}
-	{% endif %}
+	{/if}
+	{if $core_debug}
+	{include "debug.tpl"}
+	{/if}
 </body>
 </html>

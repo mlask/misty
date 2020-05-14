@@ -1,4 +1,5 @@
 <?php
+namespace misty;
 class form
 {
 	const id = '_form_id';

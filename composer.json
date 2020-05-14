@@ -4,6 +4,6 @@
         "htaccess-protect": false
     },
     "require": {
-        "twig/twig": "^3.0"
+        "smarty/smarty": "^3.1"
     }
 }
