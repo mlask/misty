@@ -14,7 +14,7 @@
 		{foreach $core_log as $log}
 		<tr>
 			<td>{$log.time|round|date_format:"Y-m-d H:i:s"}</td>
-			<td><span class="text">{$log.message}</span><span class="info"><strong>{$log.callee.file}</strong>@{$log.callee.line}</span>
+			<td><span class="text">{$log.message}</span><span class="info"><strong>{$log.source.file}</strong>@{$log.source.line}</span>
 		</tr>
 		{/foreach}
 	</table>

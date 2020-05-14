@@ -83,7 +83,7 @@ class core
 			self::$log[] = [
 				'time'		=> microtime(true),
 				'memory'	=> memory_get_usage(true),
-				'callee'	=> debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0],
+				'source'	=> debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0],
 				'message'	=> count($message) > 1 ? vsprintf(array_shift($message), $message) : array_shift($message)
 			];
 		}

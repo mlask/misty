@@ -10,8 +10,8 @@ class form
 	
 	public function __construct ()
 	{
-		$callee = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[array_key_last(array_column(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), 'function'))];
-		$this->id = sprintf('form.%s.%s', md5($callee['file']), sha1(json_encode($callee)));
+		$source = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[array_key_last(array_column(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), 'function'))];
+		$this->id = sprintf('form.%s.%s', md5($source['file']), sha1(json_encode($source)));
 		$this->is_sent = isset($_POST['__form_id']) && $_POST['__form_id'] === $this->id;
 	}
 	
