@@ -11,10 +11,14 @@ class main_module extends module
 		$this->view->render('[module]main.tpl');
 	}
 	
-	public function page ($name)
+	public function page ($name, $test = null, ...$args)
 	{
 		// page module (router example)
-		$this->view->assign('page', $name);
+		$this->view->assign([
+			'name'	=> $name,
+			'test'	=> $test,
+			'args'	=> $args
+		]);
 		$this->view->render('[module]page.tpl');
 	}
 }
