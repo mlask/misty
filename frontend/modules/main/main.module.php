@@ -8,6 +8,6 @@ class main_module extends module
 	public function main ()
 	{
 		// main module
-		$this->view->display('[module]main.tpl');
+		$this->view->render('[module]main.tpl');
 	}
 }

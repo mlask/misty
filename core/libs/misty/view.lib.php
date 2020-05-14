@@ -21,12 +21,15 @@ class view
 	{
 		$this->i18n = i18n::init();
 		
+		// create cache directory, if not exists
+		if (!file_exists(core::env()->path->cache . '/views'))
+			mkdir(core::env()->path->cache . '/views', 0777, true);
+		
 		// Smarty engine
 		$this->smarty = new \Smarty;
 		$this->smarty->setTemplateDir(core::env()->path->absolute . '/' . core::env()->path->workspace . '/views/');
-		$this->smarty->setCompileDir(core::env()->path->cache);
-		$this->smarty->setConfigDir(core::env()->path->cache);
-		$this->smarty->setCacheDir(core::env()->path->cache);
+		$this->smarty->setCompileDir(core::env()->path->cache . '/views');
+		$this->smarty->setCacheDir(core::env()->path->cache . '/views');
 		
 		// custom modifiers
 		$this->smarty->registerPlugin('modifier', 'ftime', function ($input, $format = '%Y-%m-%d %H:%M:%S') {
