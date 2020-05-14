@@ -5,7 +5,6 @@ class view
 	const PAGE = 'page';
 	const MENU = 'menu';
 	
-	private $i18n = null;
 	private $stack = null;
 	private $smarty = null;
 	private static $instance = null;
@@ -19,8 +18,6 @@ class view
 	
 	private function __construct ()
 	{
-		$this->i18n = i18n::init();
-		
 		// create cache directory, if not exists
 		if (!file_exists(core::env()->path->cache . '/views'))
 			mkdir(core::env()->path->cache . '/views', 0777, true);
@@ -152,83 +149,6 @@ class view
 		
 		// display output
 		$this->smarty->display($template);
-		
-		
-		/*
-		
-		// module views
-		if (isset(core::env()->instance))
-			$loader->addPath(core::env()->instance->path . '/views', 'module');
-		
-		// initialize Twig
-		$twig = new \Twig\Environment($loader, [
-			'debug'			=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
-			'cache'			=> core::env()->path->cache . '/views',
-		]);
-		
-		// filters
-		$twig->addFunction(new \Twig\TwigFunction('_', [$this->i18n, '_']));
-		$twig->addFunction(new \Twig\TwigFunction('_s', [$this->i18n, '_s']));
-		$twig->addFunction(new \Twig\TwigFunction('_sl', [$this->i18n, '_sl']));
-		
-		// global vars
-		$this->vars['core_env'] = core::env();
-		$this->vars['core_log'] = core::log();
-		$this->vars['core_debug'] = core::env()->request->getd('debug', false, request::TYPE_BOOL);
-		$this->vars['core_buffer'] = ob_get_contents();
-		
-		// output vars
-		$vars = is_array($this->vars) ? $this->vars : [];
-		
-		if (is_array($this->stack))
-		{
-			foreach ($this->stack as $target => $views)
-			{
-				foreach ($views as $template)
-				{
-					if (!isset($vars['view'][$target]))
-						$vars['view'][$target] = '';
-					
-					$vars['view'][$target] .= $twig->render($template, is_array($this->vars) ? $this->vars : []);
-				}
-			}
-		}
-		
-		ob_end_clean();
-		
-		$twig->display($view, $vars);
-		*/
-		/*
-		
-		
-		
-		try
-		{
-			$stack_content = null;
-			foreach ((array)$this->stack as $target => $views)
-			{
-				$stack_content[$target] = null;
-				foreach ($views as $_view)
-					$stack_content[$target] .= $this->tpl->draw(str_replace('.tpl', '', $_view), true);
-			}
-			$this->tpl->assign(['view' => $stack_content]);
-		}
-		catch (exception $ex)
-		{
-			$this->tpl->assign([
-				'core' => [
-					'exception' => [
-						'message'	=> $ex->getMessage(),
-						'code'		=> $ex->getCode(),
-						'file'		=> $ex->getFile(),
-						'line'		=> $ex->getLine(),
-						'trace'		=> $ex->getTrace()
-					]
-				]
-			], null, true);
-		}
-		$this->tpl->draw(str_replace('.tpl', '', $view));
-		*/
 	}
 	
 	private function _preflight ()
@@ -242,32 +162,7 @@ class view
 			'core_env'		=> core::env(),
 			'core_log'		=> core::log(),
 			'core_debug'	=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
-			'translate'		=> $this->i18n
+			'translate'		=> core::env()->i18n
 		]);
-	}
-}
-
-class view_functions
-{
-	public function ftime ($time, $format = '%Y-%m-%d %H:%M:%S')
-	{
-		return strftime($format, $time);
-	}
-	
-	public function ftimes ($s)
-	{
-		return sprintf('%0d:%02d:%02d', $i = floor($s / 3600), floor(($s - ($i * 3600)) / 60) % 60, $s % 60);
-	}
-	
-	public function set_class (...$args)
-	{
-		$pair = array_chunk($args, 2);
-		$outc = [];
-		foreach ($pair as $_p)
-			if ((bool)$_p[0] === true)
-				$outc[] = $_p[1];
-		if (!empty($outc))
-			return sprintf(' class="%s"', implode(' ', $outc));
-		return null;
 	}
 }

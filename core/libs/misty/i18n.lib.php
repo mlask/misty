@@ -124,7 +124,7 @@ class i18n
 		// pliki językowe aktualnego modułu
 		if (core::env()->instance)
 		{
-			foreach (glob(dirname(core::env()->instance->file) . '/i18n/*.lang.php') as $lang)
+			foreach (glob(core::env()->instance->path . '/i18n/*.lang.php') as $lang)
 			{
 				if (!isset($this->cache[md5($lang)]))
 				{

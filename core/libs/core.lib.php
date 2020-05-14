@@ -12,8 +12,11 @@ class core
 	{
 		// init autoloader
 		spl_autoload_register(function ($name, $ext = null) {
-			if (file_exists($file = sprintf('%s/%s.lib.php', __DIR__, strtr($name, '\\', '/'))))
+			if (file_exists($file = sprintf('%s/%s.lib.php', __DIR__, strtr($name, '\\', '/'))) ||
+				(($lib = $this->_get_lib($name)) !== false && file_exists($file = sprintf('%1$s/%2$ss/%3$s.%2$s.php', $lib['path'], $lib['type'], $lib['name']))))
 				require_once($file);
+			else
+				printf("not found: %s\n", $file);
 		});
 		
 		// environment configuration
@@ -32,6 +35,7 @@ class core
 				'cache'		=> realpath(dirname(dirname(__DIR__))) . '/data/cache'
 			]),
 			'cli'		=> php_sapi_name() === 'cli',
+			'i18n'		=> null,
 			'config'	=> null,
 			'request'	=> null,
 			'instance'	=> null
@@ -51,6 +55,9 @@ class core
 		
 		// load config
 		self::$env->config = config::load();
+		
+		// load i18n
+		self::$env->i18n = i18n::init();
 		
 		// get request
 		self::$env->request = new request;
@@ -76,10 +83,21 @@ class core
 			self::$log[] = [
 				'time'		=> microtime(true),
 				'memory'	=> memory_get_usage(true),
-				'callee'	=>debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0],
+				'callee'	=> debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0],
 				'message'	=> count($message) > 1 ? vsprintf(array_shift($message), $message) : array_shift($message)
 			];
 		}
 		return self::$log;
+	}
+	
+	private function _get_lib ($name)
+	{
+		if (isset(self::$env->path->core))
+		{
+			$lib = explode('\\', $name);
+			if (count($lib = explode('_', end($lib))) > 1)
+				return ['path' => self::$env->path->core, 'type' => array_pop($lib), 'name' => implode('_', $lib)];
+		}
+		return false;
 	}
 }

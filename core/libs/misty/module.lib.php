@@ -10,9 +10,6 @@ class module
 		// module name
 		$this->name = basename(get_class($this), '_module');
 		
-		// environment
-		$this->i18n = i18n::init();
-		
 		// additional libs
 		if (!empty($libs))
 			foreach ($libs as $name => & $lib)
