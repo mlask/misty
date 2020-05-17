@@ -71,6 +71,13 @@ class core
 			require_once(self::$env->path->workspace . '/init.php');
 	}
 	
+	public static function add (array $items)
+	{
+		foreach ($items as $key => $value)
+			if (!isset(self::$env->{$key}))
+				self::$env->{$key} = $value;
+	}
+	
 	public static function env ()
 	{
 		return self::$env;
@@ -141,7 +148,7 @@ class core
 				'object'	=> $_mm['ref']->newInstance(...$args)
 			]);
 			
-			if (!isset(core::env()->instance->object->__break) || core::env()->instance->object->__break === false)
+			if (!isset(core::env()->instance->object->_break) || core::env()->instance->object->_break === false)
 			{
 				if ($_mm['fallback'] && !$_mm['ref']->hasMethod(core::env()->instance->action))
 				{

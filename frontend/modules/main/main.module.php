@@ -14,7 +14,6 @@ class main_module extends module
 	public function page ($name, $test = null, ...$args)
 	{
 		$model = new test_model;
-		print_r($model);
 		
 		// page module (router example)
 		$this->view->assign([
