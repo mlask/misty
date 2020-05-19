@@ -2,6 +2,7 @@
   "name": "misty3",
   "devDependencies": {},
   "dependencies": {
+    "@mdi/font": "^5.2.45",
     "bulma": "^0.8.2",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",

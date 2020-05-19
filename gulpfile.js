@@ -31,8 +31,14 @@ gulp.task('sass', (done) => {
 		gulp.dest('./frontend/styles')
 	], done);
 });
-gulp.task('default', gulp.parallel('js', 'sass'));
-gulp.task('all', gulp.series('js', 'sass'));
+gulp.task('fonts', (done) => {
+	pump([
+		gulp.src(['./node_modules/@mdi/font/fonts/*']),
+		gulp.dest('./frontend/styles/fonts')
+	], done);
+});
+gulp.task('default', gulp.parallel('js', 'sass', 'fonts'));
+gulp.task('all', gulp.series('js', 'sass', 'fonts'));
 gulp.task('watch', gulp.parallel('js', 'sass', (done) => {
 	gulp.watch(['./frontend/styles/sass/**/*.scss'], gulp.parallel('sass'));
 	gulp.watch(['./frontend/js/source/*.js'], gulp.parallel('js'));
