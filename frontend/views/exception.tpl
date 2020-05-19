@@ -1,8 +1,13 @@
 <section class="section">
 	<article class="message is-exception">
 		<div class="message-header">
-			<b>{$core_exception->getMessage()}</b>
-			<i>{$core_exception->getFile()|dirname}/<b>{$core_exception->getFile()|basename}</b>:{$core_exception->getLine()}</i>
+			<div class="icon"><i class="mdi mdi-24px mdi-alert-octagram"></i></div>
+			<div class="text">
+				{$core_exception->getMessage()}
+				<div class="path">
+					{$core_exception->getFile()|dirname}/<b>{$core_exception->getFile()|basename}</b>:{$core_exception->getLine()}
+				</div>
+			</div>
 		</div>
 		<div class="message-body">
 			{foreach $core_exception->getTrace() as $exception_trace}

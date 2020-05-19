@@ -75,11 +75,21 @@ details {
 .message {
 	&.is-exception {
 		.message-header {
+			justify-content: flex-start;
 			background-color: #800;
-			i {
+			.icon {
+				align-self: flex-start;
+				margin-right: 10px;
+			}
+			.path {
 				font-size: 80%;
-				font-style: normal;
+				margin-top: 10px;
+				align-self: flex-end;
+				margin-left: auto;
 				font-weight: normal;
+			}
+			.text {
+				font-weight: bold;
 			}
 		}
 		.message-body {
