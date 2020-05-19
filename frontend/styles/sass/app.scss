@@ -1,3 +1,42 @@
 @import "_config";
 @import "_fonts";
-@import "../../../node_modules/bulma/bulma"
+@import "../../../node_modules/bulma/bulma";
+
+footer {
+	&.debug {
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 35vh;
+		overflow: auto;
+		position: fixed;
+		background: rgba(0, 0, 0, 0.6);
+		h6 {
+			top: 0;
+			color: #fff;
+			padding: 5px 10px;
+			position: sticky;
+			z-index: 10;
+			background: rgba(80, 80, 80, 1);
+			font-weight: bold;
+			&.exception {
+				background: rgba(200, 0, 0, 1);
+			}
+		}
+		.log {
+			color: #fff;
+			font-size: $size-7;
+			td {
+				padding: 5px 10px;
+				&:first-child {
+					color: rgba(255, 255, 255, 0.6);
+				}
+				.info {
+					color: rgba(255, 255, 255, 0.6);
+					display: block;
+					font-size: #{$size-7 - 0.2rem};
+				}
+			}
+		}
+	}
+}

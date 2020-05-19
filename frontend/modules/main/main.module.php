@@ -15,6 +15,8 @@ class main_module extends module
 	{
 		$model = new test_model;
 		
+		$model->test(123, 3.14, false);
+		
 		// page module (router example)
 		$this->view->assign([
 			'name'	=> $name,

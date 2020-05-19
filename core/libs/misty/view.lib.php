@@ -27,7 +27,7 @@ class view
 		$this->smarty->setTemplateDir(core::env()->path->absolute . '/' . core::env()->path->workspace . '/views/');
 		$this->smarty->setCompileDir(core::env()->path->cache . '/views');
 		$this->smarty->setCacheDir(core::env()->path->cache . '/views');
-		$this->smarty->setCaching(core::env()->request->getd('debug', false, request::TYPE_BOOL) ? \Smarty::CACHING_OFF : \Smarty::CACHING_LIFETIME_CURRENT);
+		$this->smarty->setCaching(\Smarty::CACHING_OFF);
 		
 		// custom modifiers
 		$this->smarty->registerPlugin('modifier', 'ftime', function ($input, $format = '%Y-%m-%d %H:%M:%S') {
@@ -50,7 +50,7 @@ class view
 		// debug/production mode
 		if (core::env()->request->getd('debug', false, request::TYPE_BOOL))
 		{
-			$this->smarty->clearAllCache();
+			$this->smarty->clearCompiledTemplate();
 		}
 		else
 		{
@@ -58,8 +58,9 @@ class view
 				$output = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $output);
 				$output = preg_replace("/[\r\n]+?(\<\?php)/", '$1', $output);
 				$output = preg_replace("/^\t+/m", '', $output);
-				$output = preg_replace("/[\r\n]/", '', $output);
 				$output = str_replace('<ul>\s*?</ul>', '', $output);
+				$output = preg_replace("/[\r\n]/", '', $output);
+				$output = preg_replace('/(\<\?php)([^\s])/', '$1 $2', $output);
 				return $output;
 			});
 		}
