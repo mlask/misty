@@ -5,12 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<base href="{$core_env->path->relative|rtrim:"/"}/" />
 	<title>misty³</title>
-	{if $core_env->local}
-	<link rel="stylesheet/less" type="text/css" href="frontend/styles/less/app.less" />
-	<script src="//cdnjs.cloudflare.com/ajax/libs/less.js/2.2.0/less.min.js" data-env="development"></script>
-	{else}
 	<link rel="stylesheet" href="frontend/styles/app.css" />
-	{/if}
 </head>
 <body data-layout="{if isset($core_env->instance)}{$core_env->instance->name}{/if}">
 	{if isset($core_view.content)}
