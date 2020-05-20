@@ -4,7 +4,6 @@ var pump = require('pump');
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var terser = require('gulp-terser');
-var through = require('through2');
 var replace = require('gulp-replace');
 var clean_css = require('gulp-clean-css');
 var sourcemaps = require('gulp-sourcemaps');
