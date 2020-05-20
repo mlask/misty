@@ -20,8 +20,15 @@ class obj
 	public function set (array $data = null)
 	{
 		if (is_array($data) && !empty($data))
+		{
+			$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
 			foreach ($data as $key => $value)
+			{
+				if (isset($this->data[$key]) && $this->origin !== $bt['file'] && ($this->allow === null || !in_array($bt['file'], $this->allow)))
+					throw new exception('Cannot modify collection outside it\'s origin', $bt['file'], $bt['line']);
 				$this->data[$key] = $value;
+			}
+		}
 	}
 	
 	public function allow ($file)

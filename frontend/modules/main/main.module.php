@@ -7,6 +7,8 @@ class main_module extends module
 	
 	public function main ()
 	{
+		print_r(core::env());
+		
 		// main module
 		$this->view->render('[module]main.tpl');
 	}

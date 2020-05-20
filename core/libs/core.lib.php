@@ -3,7 +3,7 @@ namespace misty;
 class core
 {
 	const VERSION = 3.20;
-	const VERSION_DATE = 20200513;
+	const VERSION_DATE = 20200520;
 	
 	private static $env = null;
 	private static $log = null;

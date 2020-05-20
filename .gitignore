@@ -2,10 +2,11 @@
 *.log
 *.tmp
 *.tmp.*
+.DS_Store
 composer.phar
 composer.lock
 package-lock.json
-core/libs/vendor/
-data/cache/
 node_modules/
-.DS_Store
+/core/config/*.php
+/core/libs/vendor
+/data/cache
