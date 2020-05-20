@@ -6,9 +6,12 @@ footer {
 		right: 0;
 		bottom: 0;
 		height: 35vh;
+		z-index: 10;
 		overflow: auto;
 		position: fixed;
 		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(5px);
+		-webkit-backdrop-filter: blur(5px);
 		h6 {
 			top: 0;
 			color: #fff;
@@ -28,6 +31,15 @@ footer {
 				padding: 5px 10px;
 				&:first-child {
 					color: rgba(255, 255, 255, 0.6);
+					font-size: 90%;
+					padding-top: 6px;
+					white-space: nowrap;
+					vertical-align: top;
+				}
+				.text {
+					color: inherit;
+					padding: 0;
+					background: none;
 				}
 				.info {
 					color: rgba(255, 255, 255, 0.6);
@@ -35,6 +47,12 @@ footer {
 					font-size: #{$size-7 - 0.2rem};
 				}
 			}
+		}
+		.buffer {
+			color: #fff;
+			padding: 5px 10px;
+			font-size: 70%;
+			background: none;
 		}
 	}
 }

@@ -9,7 +9,7 @@ class view
 	private $smarty = null;
 	private static $instance = null;
 	
-	public static function init ()
+	public static function load ()
 	{
 		if (self::$instance === null)
 			self::$instance = new self;
@@ -36,15 +36,8 @@ class view
 		$this->smarty->registerPlugin('modifier', 'ftimes', function ($input) {
 			return sprintf('%0d:%02d:%02d', $i = floor($input / 3600), floor(($input - ($i * 3600)) / 60) % 60, $input % 60);
 		});
-		$this->smarty->registerPlugin('modifier', 'set_class', function (...$args) {
-			$pair = array_chunk($args, 2);
-			$outc = [];
-			foreach ($pair as $_p)
-				if ((bool)$_p[0] === true)
-					$outc[] = $_p[1];
-			if (!empty($outc))
-				return sprintf(' class="%s"', implode(' ', $outc));
-			return null;
+		$this->smarty->registerPlugin('modifier', 'if_true', function ($input, $output = '') {
+			return (bool)$input ? $output : null;
 		});
 		
 		// debug/production mode

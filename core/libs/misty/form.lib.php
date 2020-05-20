@@ -4,15 +4,16 @@ class form
 {
 	private $is_valid = false;
 	private $is_sent = false;
+	private $request = null;
 	private $fields = [];
-	private $state = null;
 	private $id = null;
 	
 	public function __construct ()
 	{
 		$source = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[array_key_last(array_column(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), 'function'))];
 		$this->id = sprintf('form.%s.%s', md5($source['file']), sha1(json_encode($source)));
-		$this->is_sent = isset($_POST['__form_id']) && $_POST['__form_id'] === $this->id;
+		$this->request = request::load();
+		$this->is_sent = $this->request->sent('post', '__form_id') && $this->request->post('__form_id') === $this->id;
 	}
 	
 	public function add (...$fields)
@@ -50,16 +51,24 @@ class form
 	
 	public function on_sent ($callback = null)
 	{
-		if (is_callable($callback) && $this->is_sent)
+		if (is_callable($callback))
+		{
+			$this->validate();
+			call_user_func($callback, $this);
+		}
+	}
+	
+	public function validate ()
+	{
+		if ($this->is_sent)
 		{
 			$valid = 0;
 			foreach ($this->fields as $field)
-				$valid += (int)$field->validate();
-			
+				$valid += (int)$field->validate($this->request);
+		
 			$this->is_valid = $valid === count($this->fields);
-			
-			call_user_func($callback, $this);
 		}
+		return $this->is_valid;
 	}
 	
 	public function __get ($name)
@@ -71,6 +80,8 @@ class form
 			return $this->fields[$match[1]]->is_valid();
 		if (preg_match('/^(.+?)__value$/', $name, $match) && isset($this->fields[$match[1]]))
 			return $this->fields[$match[1]]->get_value();
+		if (preg_match('/^(.+?)__errors$/', $name, $match) && isset($this->fields[$match[1]]))
+			return $this->fields[$match[1]]->get_errors();
 		if (preg_match('/^(.+?)__required$/', $name, $match) && isset($this->fields[$match[1]]))
 			return $this->fields[$match[1]]->is_required();
 		
@@ -117,6 +128,11 @@ class form_input
 	public function get_value ()
 	{
 		return $this->value;
+	}
+	
+	public function get_errors ()
+	{
+		return $this->errors;
 	}
 	
 	public function is_valid ()
@@ -166,13 +182,13 @@ class form_input
 	
 	// walidacja
 	
-	public function validate ()
+	public function validate (& $request)
 	{
-		if (isset($_POST[$this->name]))
-			$this->set_value($_POST[$this->name]);
+		if ($request->sent('post', $this->name))
+			$this->set_value($request->post($this->name));
 		
 		$this->valid = 1
-			&& (!$this->required || ($this->required && isset($_POST[$this->name]) && strlen($_POST[$this->name]) > 0))
+			&& (!$this->required || ($this->required && $request->sent('post', $this->name) && strlen($request->post($this->name)) > 0))
 			&& ($this->validator === null || ($this->validator !== null && is_callable($this->validator) && call_user_func($this->validator, $this)));
 		
 		return $this->valid;

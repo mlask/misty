@@ -13,10 +13,17 @@ class request
 	private $req_both = null;
 	private $req_call = null;
 	private $req_post = null;
+	private static $instance = null;
 	
 	public function __construct ()
 	{
+		self::$instance = $this;
 		$this->_process();
+	}
+	
+	public static function load ()
+	{
+		return self::$instance;
 	}
 	
 	public function __get ($name)
@@ -59,6 +66,14 @@ class request
 		return $this->_get_req_d('get', ...$args);
 	}
 	
+	public function sent ($type, ...$args)
+	{
+		foreach ($args as $name)
+			if (!isset($this->{'req_' . strtolower($type)}[$name]))
+				return false;
+		return true;
+	}
+	
 	public function postd (...$args)
 	{
 		return $this->_get_req_d('post', ...$args);
@@ -92,7 +107,7 @@ class request
 		while (ob_get_level())
 			ob_end_clean();
 		
-		session_write_close();
+		core::env()->session->commit();
 		header('Location: ' . ($addr === true ? (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['REQUEST_URI']) : (preg_match('/^http[s?]/', $addr) ? $addr : rtrim(core::env()->path->relative, '/') . '/' . ltrim($addr, '/'))));
 		exit;
 	}
@@ -100,6 +115,8 @@ class request
 	public function add_route (array $route)
 	{
 		$this->routes = array_merge((array)$this->routes, $route);
+		foreach ($route as $r_from => $r_to)
+			core::log('added route %s => %s', $r_from, is_callable($r_to) ? '(function)' : $r_to);
 		$this->_process();
 	}
 	
@@ -129,11 +146,15 @@ class request
 		// routes
 		if (is_array($this->routes) && !empty($this->routes))
 		{
-			core::log('%d route(s) found', count($this->routes));
 			foreach ($this->routes as $r_from => $r_to)
 			{
 				if (preg_match($r_from, $this->query))
-					$this->query = preg_replace($r_from, $r_to, $this->query);
+				{
+					if (is_callable($r_to))
+						call_user_func($r_to, $this->query);
+					else
+						$this->query = preg_replace($r_from, $r_to, $this->query);
+				}
 			}
 		}
 		
@@ -191,18 +212,13 @@ class request
 	
 	private function _get_req ($type, ...$args)
 	{
-		$output = null;
-		if (is_array($args) && !empty($args))
+		if (!empty($args))
 		{
-			foreach ($args as $arg)
-			{
-				$arg_name = is_array($arg) ? array_shift($arg) : $arg;
-				$arg_def = is_array($arg) && !empty($arg) ? array_shift($arg) : null;
-				
-				$output[$name] = isset($this->{'req_' . $type}[$arg_name]) ? $this->{'req_' . $type}[$arg_name] : $arg_def;
-			}
+			$arg_name = array_shift($args);
+			$arg_def = !empty($args) ? array_shift($args) : null;
+			return isset($this->{'req_' . strtolower($type)}[$arg_name]) ? $this->{'req_' . strtolower($type)}[$arg_name] : $arg_def;
 		}
-		return $output;
+		return null;
 	}
 	
 	private function _get_req_d ($type, ...$args)
@@ -213,7 +229,7 @@ class request
 			$arg_def = !empty($args) ? array_shift($args) : null;
 			$arg_fmt = !empty($args) ? array_shift($args) : null;
 			
-			$value = isset($this->{'req_' . $type}[$arg_name]) ? $this->{'req_' . $type}[$arg_name] : $arg_def;
+			$value = isset($this->{'req_' . strtolower($type)}[$arg_name]) ? $this->{'req_' . strtolower($type)}[$arg_name] : $arg_def;
 			if ($value !== null && $arg_fmt !== null)
 			{
 				switch ($arg_fmt)

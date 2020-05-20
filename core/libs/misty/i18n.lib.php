@@ -9,7 +9,7 @@ class i18n
 	private $data = null;
 	private $lang = null;
 	
-	public static function init ()
+	public static function load ()
 	{
 		if (self::$instance === null)
 			self::$instance = new self;

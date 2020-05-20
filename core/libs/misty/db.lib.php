@@ -8,7 +8,7 @@ class db
 	
 	public function __construct (array $config)
 	{
-		$this->config = array_merge([
+		$default = [
 			'username'	=> '',
 			'password'	=> '',
 			'scheme'	=> false,
@@ -17,13 +17,14 @@ class db
 			'port'		=> false,
 			'engine'	=> false,
 			'charset'	=> 'utf8',
-			'timeout'	=> 15],
-			$config);
+			'timeout'	=> 15
+		];
 		
+		$this->config = array_merge($default, $config);
 		$this->_init_pdo();
 	}
 	
-	public static function init (array $config)
+	public static function load (array $config)
 	{
 		if (self::$instance === null)
 			self::$instance = new self($config);
@@ -34,24 +35,21 @@ class db
 	
 	public function query (...$args)
 	{
-		if (!$this->pdo)
-			return false;
-		return $this->pdo->query($this->_build_query($args));
+		return $this->pdo ? $this->pdo->query($this->_build_query(...$args)) : false;
 	}
 	
 	public function query_simple (...$args)
 	{
-		if (!$this->pdo)
-			return false;
-		return $this->pdo->exec($this->_build_query($args));
+		return $this->pdo ? $this->pdo->exec($this->_build_query(...$args)) : false;
 	}
 	
 	public function get_row (...$args)
 	{
 		if (!$this->pdo)
 			return false;
-		$query = $this->pdo->query($this->_build_query($args));
-		$row = $query->fetch(PDO::FETCH_ASSOC);
+		
+		$query = $this->pdo->query($this->_build_query(...$args));
+		$row = $query->fetch(\PDO::FETCH_ASSOC);
 		$query = null;
 		return $row;
 	}
@@ -60,10 +58,10 @@ class db
 	{
 		if (!$this->pdo)
 			return false;
-		$query = $this->pdo->query($this->_build_query($args));
+		
+		$query = $this->pdo->query($this->_build_query(...$args));
 		$cols = [];
-		while (($col = $query->fetchColumn()) !== false)
-			$cols[] = $col;
+		while (($col = $query->fetchColumn()) !== false) $cols[] = $col;
 		$query = null;
 		return $cols;
 	}
@@ -72,8 +70,9 @@ class db
 	{
 		if (!$this->pdo)
 			return false;
-		$query = $this->pdo->query($this->_build_query($args));
-		$array = $query->fetchAll(PDO::FETCH_ASSOC);
+		
+		$query = $this->pdo->query($this->_build_query(...$args));
+		$array = $query->fetchAll(\PDO::FETCH_ASSOC);
 		$query = null;
 		return $array;
 	}
@@ -82,15 +81,16 @@ class db
 	{
 		if (!$this->pdo)
 			return false;
-		$query = $this->pdo->query($this->_build_query($args));
-		$row = $query->fetch(PDO::FETCH_NUM);
+		
+		$query = $this->pdo->query($this->_build_query(...$args));
+		$row = $query->fetch(\PDO::FETCH_NUM);
 		$query = null;
 		return array_shift($row);
 	}
 	
 	public function preview_query (...$args)
 	{
-		return $this->_build_query($args);
+		return $this->_build_query(...$args);
 	}
 	
 	/* ---------- Funkcje prywatne ---------- */
@@ -107,11 +107,13 @@ class db
 						'unix_socket'	=> $this->config['socket'],
 						'host'			=> $this->config['host'],
 						'port'			=> $this->config['port'],
-						'dbname'		=> $this->config['scheme']]);
-					$this->pdo = new PDO('mysql:' . $dsn, $this->config['username'], $this->config['password'], [
-						PDO::ATTR_TIMEOUT				=> (int)$this->config['timeout'],
-						PDO::MYSQL_ATTR_INIT_COMMAND	=> sprintf("SET NAMES '%s'", strtoupper($this->config['charset']))]);
-					$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+						'dbname'		=> $this->config['scheme']
+					]);
+					$this->pdo = new \PDO('mysql:' . $dsn, $this->config['username'], $this->config['password'], [
+						\PDO::ATTR_TIMEOUT				=> (int)$this->config['timeout'],
+						\PDO::MYSQL_ATTR_INIT_COMMAND	=> sprintf("SET NAMES '%s'", strtoupper($this->config['charset']))
+					]);
+					$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 					core::log('db connected to mysql');
 					break;
 				}
@@ -123,7 +125,7 @@ class db
 		}
 		catch (PDOException $e)
 		{
-			core::log('db exception: ' . $e->getMessage());
+			core::log('db exception: %s', $e->getMessage());
 		}
 	}
 	
@@ -139,10 +141,12 @@ class db
 	private function _flatten (array $array, $key = '', & $output = [])
 	{
 		foreach ($array as $_k => $_v)
+		{
 			if (is_array($_v))
 				$this->_flatten($_v, ltrim($key . '.' . $_k, '.'), $output);
 			else
 				$output[ltrim($key . '.' . $_k, '.')] = $_v;
+		}
 		return $output;
 	}
 	
@@ -151,8 +155,12 @@ class db
 		return $this->pdo ? $this->pdo->quote($input) : sprintf('\'%s\'', addcslashes($input, '\''));
 	}
 	
-	private function _build_query (array $args)
+	private function _build_query (...$args)
 	{
+		// if empty
+		if (count($args) === 0)
+			return false;
+		
 		// sql query string always as first argument
 		$sql = array_shift($args);
 		
@@ -181,7 +189,7 @@ class db
 		if (strpos($sql, '/*{{') !== false)
 			$sql = $this->_conditionals($sql);
 		
-		core::log('sql: ' . $sql);
+		core::log('sql: %s', $sql);
 		return $sql;
 	}
 	

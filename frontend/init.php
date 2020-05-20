@@ -7,7 +7,7 @@ new class
 	public function __construct ()
 	{
 		$mod = null;
-		$this->view = view::init();
+		$this->view = view::load();
 		
 		// "do, or do not, there's no..."
 		try

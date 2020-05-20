@@ -7,6 +7,7 @@ class core
 	
 	private static $env = null;
 	private static $log = null;
+	private static $mem = null;
 	
 	public function __construct ($workspace = null)
 	{
@@ -38,6 +39,7 @@ class core
 			'i18n'		=> null,
 			'config'	=> null,
 			'request'	=> null,
+			'session'	=> null,
 			'instance'	=> null
 		]);
 		
@@ -50,17 +52,17 @@ class core
 		if (!file_exists(self::$env->path->workspace))
 			throw new exception('Workspace not found: ' . self::$env->path->workspace);
 		
-		// set session identifier
-		session_name(self::$env->uuid);
+		// create session object
+		self::$env->session = new session;
+		
+		// get request
+		self::$env->request = new request;
 		
 		// load config
 		self::$env->config = config::load();
 		
 		// load i18n
-		self::$env->i18n = i18n::init();
-		
-		// get request
-		self::$env->request = new request;
+		self::$env->i18n = i18n::load();
 		
 		// vendor libs autoloader
 		if (file_exists(self::$env->path->core . '/libs/vendor/autoload.php'))
@@ -87,12 +89,15 @@ class core
 	{
 		if (count($message) > 0)
 		{
+			$mem = memory_get_usage();
 			self::$log[] = [
 				'time'		=> microtime(true),
-				'memory'	=> memory_get_usage(true),
+				'memory'	=> self::$mem !== null ? $mem - self::$mem : $mem,
 				'source'	=> debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0],
 				'message'	=> count($message) > 1 ? vsprintf(array_shift($message), $message) : array_shift($message)
 			];
+			self::$mem = $mem;
+			unset($mem);
 		}
 		return self::$log;
 	}
