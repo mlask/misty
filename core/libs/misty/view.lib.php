@@ -152,6 +152,19 @@ class view
 		$this->smarty->display($template);
 	}
 	
+	public function __debugInfo ()
+	{
+		return [
+			'stack'		=> $this->stack,
+			'smarty'	=> [
+				'template_dir'	=> $this->smarty->getTemplateDir(),
+				'caching'		=> $this->smarty->caching,
+				'debug'			=> (int)core::env()->request->getd('debug', false, request::TYPE_BOOL),
+				'vars'			=> array_keys($this->smarty->getTemplateVars())
+			]
+		];
+	}
+	
 	private function _preflight ()
 	{
 		// module views

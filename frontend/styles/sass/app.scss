@@ -42,7 +42,9 @@ details {
 	&.collapsible {
 		summary {
 			cursor: pointer;
-			padding: 5px 10px;
+			display: block;
+			padding: 5px 10px 5px 26px;
+			position: relative;
 			font-size: 80%;
 			-moz-user-select: none;
 			-webkit-user-select: none;
@@ -52,6 +54,14 @@ details {
 			&:focus {
 				outline: none;
 			}
+			&::-webkit-details-marker {
+				display: none;
+			}
+			&::before {
+				left: 10px;
+				content: "\25B6";
+				position: absolute;
+			}
 		}
 		summary ~ * {
 			color: #fff;
@@ -59,16 +69,15 @@ details {
 			font-size: 75%;
 			background: #444;
 			tab-size: 20px;
-			&.details {
-				overflow: auto;
-				font-size: 60%;
-				border-top: 1px solid rgba(255, 255, 255, 0.1);
-				max-height: 200px;
-			}
 		}
 		&[open] {
 			color: #fff;
-			background: #333;;
+			background: #333;
+			summary {
+				&::before {
+					content: "\25BC";
+				}
+			}
 		}
 	}
 }
@@ -96,6 +105,15 @@ details {
 			padding: 0;
 			overflow: hidden;
 			background-color: lighten(#800, 65%);
+			.path {
+				opacity: 0.6;
+				font-size: 80%;
+			}
+			.details {
+				overflow: auto;
+				font-size: 60%;
+				max-height: 300px;
+			}
 		}
 	}
 }
