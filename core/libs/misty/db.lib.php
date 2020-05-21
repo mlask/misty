@@ -123,9 +123,10 @@ class db
 				}
 			}
 		}
-		catch (PDOException $e)
+		catch (\PDOException $e)
 		{
 			core::log('db exception: %s', $e->getMessage());
+			throw new exception($e->getMessage());
 		}
 	}
 	

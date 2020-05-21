@@ -1,12 +1,13 @@
 <h1 class="title">{$core_env->instance->name}</h1>
 <h2 class="subtitle">{$core_env->instance->action} &middot; {$core_env->request->params()|json_encode}</h2>
 
-{if $core_env->user->status}
-<div class="notification is-{if $core_env->user->auth}success{else}warning{/if}">
+{if isset($core_env->user) && $core_env->user->status}
+<div class="notification is-{if isset($core_env->user) && $core_env->user->auth}success{else}warning{/if}">
 	{$translate->_s('Authorization status: <b>%s</b>', $core_env->user->status)}
 </div>
 {/if}
 
+{if isset($core_env->user)}
 {if !$core_env->user->auth}
 <form action="{$core_env->request->self}" method="post">
 	<input type="hidden" name="__form_id" value="{$core_env->user->form->id}">
@@ -52,4 +53,5 @@
 	<a href="user/logout">{$translate->_('Logout')}</a><br />
 	<a href="user/logout?redir=page/test.html">{$translate->_('Logout with redirection')}</a>
 </p>
+{/if}
 {/if}

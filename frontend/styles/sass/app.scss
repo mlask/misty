@@ -4,20 +4,48 @@ footer {
 	&.debug {
 		left: 0;
 		right: 0;
-		bottom: 0;
+		bottom: -35vh;
 		height: 35vh;
-		z-index: 10;
-		overflow: auto;
+		z-index: 11;
 		position: fixed;
 		background: rgba(0, 0, 0, 0.6);
+		transition: bottom 0.2s ease;
 		backdrop-filter: blur(5px);
 		-webkit-backdrop-filter: blur(5px);
+		&:hover {
+			bottom: 0;
+			box-shadow: 0 -1px 5px 0 rgba(0, 0, 0, 0.4);
+			&::before {
+				content: char(map-get($mdi-icons, "close"));
+			}
+		}
+		&::before {
+			@extend .#{$mdi-css-prefix}-set;
+			top: -30px;
+			color: #fff;
+			left: calc(50% - 50px);
+			width: 100px;
+			height: 40px;
+			content: char(map-get($mdi-icons, "message-bulleted"));
+			z-index: 10;
+			position: absolute;
+			font-size: 20px;
+			background: rgba(80, 80, 80, 1);
+			box-shadow: 0 -1px 5px 0 rgba(0, 0, 0, 0.4);
+			text-align: center;
+			line-height: 30px;
+			border-radius: 4px;
+			backdrop-filter: blur(5px);
+			-webkit-backdrop-filter: blur(5px);
+		}
 		h6 {
 			top: 0;
 			color: #fff;
-			padding: 5px 10px;
-			position: sticky;
+			margin: 0;
+			padding: 10px;
 			z-index: 10;
+			position: sticky;
+			font-size: 80%;
 			background: rgba(80, 80, 80, 1);
 			font-weight: bold;
 			&.exception {
@@ -26,11 +54,18 @@ footer {
 		}
 		.log {
 			color: #fff;
+			width: 100%;
+			border: none;
 			font-size: $size-7;
+			table-layout: fixed;
 			td {
+				border: none;
 				padding: 5px 10px;
+				overflow: hidden;
+				text-overflow: ellipsis;
 				&:first-child {
 					color: rgba(255, 255, 255, 0.6);
+					width: 150px;
 					font-size: 90%;
 					padding-top: 6px;
 					white-space: nowrap;
@@ -40,6 +75,8 @@ footer {
 					color: inherit;
 					padding: 0;
 					background: none;
+					word-break: break-all;
+					white-space: pre-wrap;
 				}
 				.info {
 					color: rgba(255, 255, 255, 0.6);
@@ -53,6 +90,14 @@ footer {
 			padding: 5px 10px;
 			font-size: 70%;
 			background: none;
+		}
+		.content {
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			overflow: auto;
+			position: absolute;
 		}
 	}
 }
