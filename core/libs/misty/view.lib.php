@@ -6,13 +6,14 @@ class view
 	const MENU = 'menu';
 	
 	private $stack = null;
+	private $assets = null;
 	private $smarty = null;
 	private static $instance = null;
 	
 	public static function load ()
 	{
 		if (self::$instance === null)
-			self::$instance = new self;
+			self::$instance = new static;
 		return self::$instance;
 	}
 	
@@ -38,6 +39,35 @@ class view
 		});
 		$this->smarty->registerPlugin('modifier', 'if_true', function ($input, $output = '') {
 			return (bool)$input ? $output : null;
+		});
+		
+		// custom functions
+		$this->smarty->registerPlugin('function', 'form_class', function ($params, $smarty) {
+			if (isset($params['form'], $params['field']) && $params['form'] instanceof form)
+			{
+				$class = [];
+				if ($params['form']->is_sent && !$params['form']->{$params['field'] . '__valid'})
+					$class[] = 'is-danger';
+				elseif ($params['form']->is_sent && $params['form']->{$params['field'] . '__valid'})
+					$class[] = 'is-success';
+				return !empty($class) ? (!isset($params['space']) || $params['space'] === true ? ' ' : '') . implode(' ', $class) : '';
+			}
+			return '';
+		});
+		$this->smarty->registerPlugin('function', 'form_error', function ($params, $smarty) {
+			if (isset($params['form'], $params['template']) && $params['form'] instanceof form)
+			{
+				$output = '';
+				if (isset($params['field']))
+				{
+					if ($params['form']->is_sent && !$params['form']->{$params['field'] . '__valid'})
+						if (is_array($params['form']->{$params['field'] . '__errors'}))
+							foreach ($params['form']->{$params['field'] . '__errors'} as $error_msg)
+								$output .= sprintf($params['template'], $error_msg);
+				}
+				return $output;
+			}
+			return '';
 		});
 		
 		// debug/production mode
@@ -84,6 +114,43 @@ class view
 		ob_start();
 	}
 	
+	public function assets (...$items)
+	{
+		if (is_array($items) && !empty($items))
+		{
+			foreach ($items as $item)
+			{
+				$key = null;
+				$path = null;
+				
+				$item = preg_replace_callback('/\[(.+?)\]/', function (array $m) use (& $path) { $path = $m[1]; return ''; }, $item);
+				$item = preg_replace_callback('/\{(.+?)\}/', function (array $m) use (& $key) { $key = $m[1]; return ''; }, $item);
+				
+				$file_path = ($path === 'module' ? core::env()->instance->path . '/js' : core::env()->path->absolute . '/' . core::env()->path->workspace . '/js') . '/' . $item;
+				$file_relpath = ($path === 'module' ? core::env()->instance->relpath . '/js' : core::env()->path->workspace . '/js') . '/' . $item;
+				if (file_exists($file_path))
+				{
+					$info = pathinfo($file_path);
+				
+					if ($key === null && strtolower($info['extension']) === 'js')
+						$key = 'js';
+					elseif ($key === null && strtolower($info['extension']) === 'css')
+						$key = 'css';
+				
+					if (!isset($this->assets[$key]))
+						$this->assets[$key] = [];
+				
+					$this->assets[$key][md5($file_path)] = [
+						'relpath'	=> $file_relpath,
+						'path'		=> $file_path,
+						'type'		=> $key,
+						'ts'		=> filemtime($file_path)
+					];
+				}
+			}
+		}
+	}
+	
 	public function assign ($variable, $value = null)
 	{
 		$this->smarty->assign($variable, $value);
@@ -91,7 +158,12 @@ class view
 	
 	public function render ($template, $target = null)
 	{
-		$this->stack[$target ?: 'content'][] = $template;
+		$key = null;
+		$template = preg_replace_callback('/\{(.+?)\}/', function (array $m) use (& $key) { $key = $m[1]; return ''; }, $template);
+		if ($key !== null)
+			$this->stack[$target ?: 'content'][$key] = $template;
+		else
+			$this->stack[$target ?: 'content'][] = $template;
 	}
 	
 	public function display ($template)
@@ -121,12 +193,13 @@ class view
 		// view stack
 		if (is_array($this->stack) && !empty($this->stack))
 		{
-			foreach ($this->stack as $target => $views)
+			foreach ($this->stack as $target => $tviews)
 			{
-				foreach ($views as $view)
+				foreach ($tviews as $view)
 				{
 					if (!isset($views[$target]))
 						$views[$target] = '';
+					
 					$views[$target] .= $this->smarty->fetch($view);
 				}
 			}
@@ -139,7 +212,8 @@ class view
 		]);
 		
 		// disable output buffering
-		ob_end_clean();
+		while (ob_get_length())
+			ob_end_clean();
 		
 		// display output
 		$this->smarty->display($template);
@@ -169,7 +243,8 @@ class view
 			'core_env'		=> core::env(),
 			'core_log'		=> core::log(),
 			'core_debug'	=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
-			'translate'		=> core::env()->i18n
+			'view_assets'	=> $this->assets,
+			'i18n'			=> & core::env()->i18n
 		]);
 	}
-}
+};

@@ -12,12 +12,21 @@ new class
 		// "do, or do not, there's no..."
 		try
 		{
-			core::run(['view' => $this->view]);
+			core::run('main', [
+				'view'		=> $this->view,
+				'menu'		=> menu::load(),
+				'request'	=> request::load()
+			]);
 		}
-		catch (exception $exception)
+		catch (\Exception $e)
 		{
 			// exception to view
-			$this->view->assign('core_exception', $exception);
+			$this->view->assign('core_exception', $e);
+		}
+		catch (\Throwable $t)
+		{
+			// throwable to view
+			$this->view->assign('core_exception', $t);
 		}
 		
 		// update i18n data

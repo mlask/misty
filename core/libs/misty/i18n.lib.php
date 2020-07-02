@@ -12,7 +12,7 @@ class i18n
 	public static function load ()
 	{
 		if (self::$instance === null)
-			self::$instance = new self;
+			self::$instance = new static;
 		return self::$instance;
 	}
 	
@@ -32,7 +32,7 @@ class i18n
 		else
 		{
 			if (self::$instance === null)
-				self::$instance = new self;
+				self::$instance = new static;
 			self::$instance->lang = $lang;
 			return self::$instance;
 		}
@@ -145,4 +145,4 @@ class i18n
 			foreach ($this->data as $lang => & $data)
 				$data = array_map([$this, '_cleanup'], $data);
 	}
-}
+};

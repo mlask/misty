@@ -25,7 +25,7 @@ class obj
 			foreach ($data as $key => $value)
 			{
 				if (isset($this->data[$key]) && $this->origin !== $bt['file'] && ($this->allow === null || !in_array($bt['file'], $this->allow)))
-					throw new exception('Cannot modify collection outside it\'s origin', $bt['file'], $bt['line']);
+					throw new exception(i18n::load()->_('Cannot modify misty\obj outside it\'s origin!'), $bt['file'], $bt['line']);
 				$this->data[$key] = $value;
 			}
 		}
@@ -55,14 +55,14 @@ class obj
 	{
 		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
 		if ($this->origin !== $bt['file'] && ($this->allow === null || !in_array($bt['file'], $this->allow)))
-			throw new exception('Cannot modify collection outside it\'s origin', $bt['file'], $bt['line']);
+			throw new exception(i18n::load()->_('Cannot modify misty\obj outside it\'s origin!'), $bt['file'], $bt['line']);
 		$this->data[$name] = $value;
 	}
 	
 	public function __call ($name, $arguments)
 	{
-		if (isset($this->data[$name]) && is_callable($this->data[$name]))
-			$this->data[$name](...$arguments);
+		if (isset($this->data[$name]) && (is_callable($this->data[$name]) || $this->data[$name] instanceof \Closure))
+			return $this->data[$name](...$arguments);
 	}
 	
 	public function __isset ($name)
@@ -75,4 +75,4 @@ class obj
 		if (isset($this->data[$name]))
 			unset($this->data[$name]);
 	}
-}
+};

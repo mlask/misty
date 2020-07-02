@@ -2,49 +2,56 @@
 namespace misty;
 class menu
 {
-	private $menu = null;
 	private static $instance = null;
+	private $menu = null;
 	
-	public static function init ()
+	public static function load ()
 	{
 		if (self::$instance === null)
-			self::$instance = new self;
+			self::$instance = new static;
 		return self::$instance;
 	}
 	
-	private function __construct ()
+	public static function __callStatic ($name, $args)
 	{
-		$this->menu = null;
+		if (class_exists($class = '\\misty\\menu\\' . $name))
+			return new $class(...$args);
 	}
 	
-	public function add_item ($name, $action = false, $order = 0, $badge = false, array $submenu = null)
+	public function __construct ()
 	{
-		if ($action === false)
-		{
-			$dbg = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-			$action = basename($dbg[1]['class'], '_module');
-			unset($dbg);
-		}
-		if ($submenu !== null)
-		{
-			foreach ($submenu as $_n => & $_s)
-			{
-				$_s = [
-					'name'		=> isset($_s['name']) ? $_s['name'] : $_n,
-					'action'	=> isset($_s['action']) ? $_s['action'] : $_s
-				];
-			}
-			$submenu = array_values($submenu);
-		}
-		$this->menu[] = [
-			'name'		=> $name,
-			'action'	=> $action,
-			'order'		=> $order,
-			'badge'		=> $badge,
-			'submenu'	=> !empty($submenu) ? $submenu : false
-		];
-		usort($this->menu, function ($a, $b) { return $a['order'] < $b['order'] ? -1 : 1; });
+		// register in core
+		core::env()->set(['menu' => $this]);
+	}
+	
+	public function add (...$items)
+	{
+		if (!empty($items))
+			foreach ($items as & $item)
+				if ($item instanceof \misty\menu\item)
+					$this->menu[] = $item;
 		return $this;
+	}
+	
+	public function get ()
+	{
+		if (is_array($this->menu) && !empty($this->menu))
+		{
+			if (isset(core::env()->user) && core::env()->user->auth)
+			{
+				$this->menu = array_filter($this->menu, function (& $item) {
+					$item_action = $item->get_action(true);
+					return core::env()->user->has_access($item_action['module'], $item_action['action']);
+				});
+			}
+			
+			usort($this->menu, function ($item_a, $item_b) {
+				return $item_a->get_order() > $item_b->get_order() ? 1 : -1;
+			});
+			foreach ($this->menu as & $item)
+				$item->reorder();
+		}
+		return $this->menu;
 	}
 	
 	public function clear ()
@@ -52,9 +59,4 @@ class menu
 		$this->menu = null;
 		return $this;
 	}
-	
-	public function get ()
-	{
-		return $this->menu;
-	}
-}
+};

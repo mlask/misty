@@ -12,7 +12,7 @@ class config
 			throw new exception('Cannot load configuration without misty core!');
 		
 		if (self::$instance === null)
-			self::$instance = new self;
+			self::$instance = new static;
 		return self::$instance;
 	}
 	
@@ -78,4 +78,4 @@ class config
 			yield $prefix => $input;
 		}
 	}
-}
+};

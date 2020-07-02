@@ -10,4 +10,4 @@ class exception extends \exception
 			$this->line = $line;
 		parent::__construct($message);
 	}
-}
+};

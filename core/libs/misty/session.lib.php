@@ -61,4 +61,4 @@ class session
 		session_regenerate_id(true);
 		return session_id();
 	}
-}
+};

@@ -2,7 +2,14 @@
 namespace misty;
 class db
 {
-	private static $instance = null;
+	const TYPE_MAP = [
+		'NULL'		=> \PDO::PARAM_NULL,
+		'string'	=> \PDO::PARAM_STR,
+		'integer'	=> \PDO::PARAM_INT,
+		'boolean'	=> \PDO::PARAM_BOOL
+	];
+	
+	private static $instances = null;
 	private $config = null;
 	private $pdo = null;
 	
@@ -26,9 +33,10 @@ class db
 	
 	public static function load (array $config)
 	{
-		if (self::$instance === null)
-			self::$instance = new self($config);
-		return self::$instance;
+		$id = md5(json_encode($config));
+		if (!isset(self::$instances[$id]))
+			self::$instances[$id] = new static($config);
+		return self::$instances[$id];
 	}
 	
 	/* ---------- Funkcje publiczne ---------- */
@@ -85,12 +93,32 @@ class db
 		$query = $this->pdo->query($this->_build_query(...$args));
 		$row = $query->fetch(\PDO::FETCH_NUM);
 		$query = null;
-		return array_shift($row);
+		return is_array($row) ? array_shift($row) : false;
 	}
 	
 	public function preview_query (...$args)
 	{
 		return $this->_build_query(...$args);
+	}
+	
+	public function transaction_start ($options = null)
+	{
+		$this->query_simple('START TRANSACTION' . ($options !== null ? ' ' . $options : ''));
+	}
+	
+	public function transaction_commit ()
+	{
+		$this->query_simple('COMMIT');
+	}
+	
+	public function transaction_rollback ()
+	{
+		$this->query_simple('ROLLBACK');
+	}
+	
+	public function affected_rows (\PDOStatement $query)
+	{
+		return $query->rowCount();
 	}
 	
 	/* ---------- Funkcje prywatne ---------- */
@@ -139,21 +167,24 @@ class db
 		return implode(';', $dsn);
 	}
 	
-	private function _flatten (array $array, $key = '', & $output = [])
+	private function _flatten (array $array, $index = 0, $prefix = null)
 	{
 		foreach ($array as $_k => $_v)
 		{
+			$key = is_numeric($_k) && $index !== null ? $index . '.' . $_k : ($prefix !== null ? $prefix . '.' : '') . $_k;
 			if (is_array($_v))
-				$this->_flatten($_v, ltrim($key . '.' . $_k, '.'), $output);
+				yield from $this->_flatten($_v, null, $key);
 			else
-				$output[ltrim($key . '.' . $_k, '.')] = $_v;
+				yield $key => $_v;
 		}
-		return $output;
 	}
 	
-	private function _quote ($input)
+	private function _quote ($input, $type = null)
 	{
-		return $this->pdo ? $this->pdo->quote($input) : sprintf('\'%s\'', addcslashes($input, '\''));
+		if ($type === null && (gettype($input) === 'integer' || gettype($input) === 'boolean'))
+			return (int)$input;
+		
+		return $this->pdo ? $this->pdo->quote($input, $type === null ? \PDO::PARAM_STR : $type) : sprintf('\'%s\'', addcslashes($input, '\''));
 	}
 	
 	private function _build_query (...$args)
@@ -171,15 +202,12 @@ class db
 			$params = null;
 			foreach ($args as $_ai => $_av)
 			{
-				$params[$_ai + 1] = $_av;
 				if (is_array($_av))
-				{
 					foreach ($this->_flatten($_av, $_ai + 1) as $_avk => $_avv)
 						$params[$_avk] = $_avv;
-					foreach ($this->_flatten($_av) as $_avk => $_avv)
-						$params[$_avk] = $_avv;
-				}
+				$params[$_ai + 1] = $_av;
 			}
+			core::log('db parameters: %s', json_encode($params));
 			$sql = preg_replace_callback('/\[::(.+?)\]/', function ($match) use ($params) { return $this->_replace_tag($match, $params); }, $sql);
 		}
 		
@@ -200,6 +228,7 @@ class db
 		$key = array_shift($tag);
 		$noq = false;
 		$out = isset($params[$key]) ? (is_array($params[$key]) ? json_encode($params[$key]) : $params[$key]) : null;
+		
 		if (!empty($tag))
 		{
 			foreach ($tag as $_t)
@@ -208,23 +237,49 @@ class db
 				$_t = array_shift($_a);
 				switch (strtolower($_t))
 				{
+					case 'not_null':
+					{
+						$out = $out !== null && strlen($out) > 0 ? $out : '';
+						break;
+					}
 					case 'default':
 					{
 						$out = ($out !== null && strlen($out) > 0) ? $out : (!empty($_a) ? array_shift($_a) : null);
+						break;
+					}
+					case 'noesc':
+					{
+						$noq = true;
+						break;
+					}
+					case 'join':
+					{
+						if (is_array($params[$key]))
+						{
+							$out = $params[$key];
+							array_walk($out, function (& $item) { $item = !is_array($item) ? $this->_quote($item, \PDO::PARAM_STR) : null; });
+							if (!empty(array_filter($out)))
+							{
+								$out = implode(',', array_filter($out));
+								$noq = true;
+							}
+							else
+								$out = null;
+						}
 						break;
 					}
 					case 'like':
 					{
 						if ($out !== null && strlen($out) > 0)
 						{
-							$out = preg_replace('/^\'(.*)\'$/', '$1', $this->_quote(strtr($out, ['%' => '\%', '_' => '\_']), PDO::PARAM_STR));
+							$out = preg_replace('/^\'(.*)\'$/', '$1', $this->_quote(strtr($out, ['%' => '\%', '_' => '\_']), \PDO::PARAM_STR));
 							$noq = true;
 						}
 						break;
 					}
-					case 'noesc':
+					case 'null':
 					{
-						$noq = true;
+						$out = $out !== null && strlen($out) === 0 ? null : $out;
 						break;
 					}
 					case 'hex':
@@ -240,8 +295,10 @@ class db
 				}
 			}
 		}
+		
 		if ($out !== null && $noq === false)
 			$out = $this->_quote($out);
+		
 		return $out === null ? 'NULL' : $out;
 	}
 	
@@ -262,8 +319,9 @@ class db
 
 	private function _conditionals_replace (array $input)
 	{
+		core::log('db conditional: %s', $input[1]);
 		if (eval('return (' . $input[1] . ');'))
 			return $input[2];
 		return isset($input[4]) ? $input[4] : null;
 	}
-}
+};

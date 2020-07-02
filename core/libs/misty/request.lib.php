@@ -8,11 +8,15 @@ class request
 	
 	public $xhr = null;
 	public $self = null;
+	public $query = null;
+	public $params = null;
+	public $callback = null;
 	private $routes = null;
 	private $req_get = null;
 	private $req_both = null;
 	private $req_call = null;
 	private $req_post = null;
+	private $processing = true;
 	private static $instance = null;
 	
 	public function __construct ()
@@ -102,13 +106,53 @@ class request
 		return $output;
 	}
 	
+	public function replace (array $params = null)
+	{
+		if (is_array($params) && !empty($params))
+		{
+			$query = null;
+			$replaced = false;
+			
+			// src module
+			if ($this->req_call->module !== null)
+				$query[] = $this->req_call->module;
+			elseif (isset(core::env()->instance))
+				$query[] = core::env()->instance->name;
+			
+			// src action
+			if ($this->req_call->action !== null)
+				$query[] = $this->req_call->action;
+			elseif (isset(core::env()->instance) && !core::env()->instance->default)
+				$query[] = core::env()->instance->action;
+				
+			// src params
+			if (is_iterable($this->req_call->iparam))
+			{
+				foreach ($this->req_call->iparam as $param)
+				{
+					$query[] = isset($params[$param->name]) ? sprintf('%s:%s', $param->name, $params[$param->name]) : $param->raw;
+					if (isset($params[$param->name]))
+						unset($params[$param->name]);
+				}
+			}
+			
+			// dst params
+			if (!empty($params))
+				foreach ($params as $_name => $_value)
+					$query[] = sprintf('%s:%s', $_name, $_value);
+			
+			return strlen($this->query) > 0 ? str_replace($this->query, implode('/', $query), $this->self) : implode('/', $query);
+		}
+		return $this->self;
+	}
+	
 	public function redirect ($addr = '')
 	{
 		while (ob_get_level())
 			ob_end_clean();
 		
 		core::env()->session->commit();
-		header('Location: ' . ($addr === true ? (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['REQUEST_URI']) : (preg_match('/^http[s?]/', $addr) ? $addr : rtrim(core::env()->path->relative, '/') . '/' . ltrim($addr, '/'))));
+		header('Location: ' . ($addr === true ? (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['REQUEST_URI']) : (preg_match('/^http[s?]:/', $addr) ? $addr : (strlen($addr) > 0 && $addr[0] === '/' ? $addr : rtrim(core::env()->path->relative, '/') . '/' . ltrim($addr, '/')))));
 		exit;
 	}
 	
@@ -116,12 +160,39 @@ class request
 	{
 		$this->routes = array_merge((array)$this->routes, $route);
 		foreach ($route as $r_from => $r_to)
-			core::log('added route %s => %s', $r_from, is_callable($r_to) ? '(function)' : $r_to);
+			core::log('added route %s => %s', $r_from, is_callable($r_to) || $r_to instanceof \Closure ? '(function)' : $r_to);
 		$this->_process();
+	}
+	
+	public function get_input ()
+	{
+		return file_get_contents('php://input');
+	}
+	
+	public function is_method (...$methods)
+	{
+		return isset($_SERVER['REQUEST_METHOD']) ? in_array(strtoupper($_SERVER['REQUEST_METHOD']), array_map(function ($item) { return strtoupper($item); }, $methods)) : false;
+	}
+	
+	public function get_method ()
+	{
+		return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
+	}
+	
+	public function processing ($toggle = true)
+	{
+		$this->processing = $toggle;
+		if ($toggle)
+			$this->_process();
 	}
 	
 	private function _process ()
 	{
+		if (!$this->processing)
+			return;
+		
+		core::log('processing request');
+		
 		// request arguments
 		if (core::env()->cli)
 		{
@@ -142,6 +213,7 @@ class request
 		// request
 		$this->query = !empty($query_args) ? array_shift($query_args) : null;
 		$this->params = !empty($query_args) ? array_shift($query_args) : null;
+		$this->callback = null;
 		
 		// routes
 		if (is_array($this->routes) && !empty($this->routes))
@@ -150,8 +222,8 @@ class request
 			{
 				if (preg_match($r_from, $this->query))
 				{
-					if (is_callable($r_to))
-						call_user_func($r_to, $this->query);
+					if (is_callable($r_to) || $r_to instanceof \Closure)
+						$this->callback = call_user_func_array($r_to, [&$this->query]);
 					else
 						$this->query = preg_replace($r_from, $r_to, $this->query);
 				}
@@ -166,16 +238,20 @@ class request
 				'module'	=> !empty($call) && preg_match('/^[a-z0-9_-]+$/i', $call[0]) ? str_replace('-', '_', array_shift($call)) : null,
 				'action'	=> !empty($call) && preg_match('/^[a-z0-9_-]+$/i', $call[0]) ? str_replace('-', '_', array_shift($call)) : null,
 				'params'	=> new obj(!empty($call) ? $call : []),
-				'nparam'	=> new obj
+				'nparam'	=> new obj,
+				'iparam'	=> new \ArrayObject
 			]);
-			
+				
 			foreach ($this->req_call->params->get() as $_pi => $_pp)
 			{
 				if (preg_match('/^([a-z0-9_]+?):(.+?)$/', $_pp, $_pm))
 				{
-					$this->req_call->nparam->{$_pm[1]}	 = $_pm[2];
+					$this->req_call->iparam[(int)$_pi] = new obj(['name' => $_pm[1], 'value' => $_pm[2], 'index' => $_pi, 'raw' => $_pp]);
+					$this->req_call->nparam->{$_pm[1]} = $_pm[2];
 					unset($this->req_call->params->{$_pi});
 				}
+				else
+					$this->req_call->iparam[(int)$_pi] = new obj(['name' => $_pp, 'value' => null, 'index' => $_pi, 'raw' => $_pp]);
 			}
 			
 			$this->req_call->params->reindex();
@@ -255,4 +331,4 @@ class request
 		}
 		return null;
 	}
-}
+};

@@ -8,7 +8,7 @@ class module
 	public function __construct (array $libs = null)
 	{
 		// module name
-		$this->name = basename(get_class($this), '_module');
+		$this->name = preg_match('/^misty\\\(.+?)_module$/', get_class($this), $m) ? $m[1] : basename(get_class($this), '_module');
 		
 		// additional libs
 		if (!empty($libs))
@@ -29,4 +29,4 @@ class module
 		if (isset($this->libs[$name]))
 			return $this->libs[$name];
 	}
-}
+};

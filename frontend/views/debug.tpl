@@ -1,11 +1,11 @@
 <footer class="debug">
 	<div class="content">
 		{if isset($core_buffer) && $core_buffer}
-		<h6>{$translate->_('Zawartość bufora')}</h6>
+		<h6>{$i18n->_('Zawartość bufora')}</h6>
 		<pre class="buffer">{$core_buffer}</pre>
 		{/if}
 		{if isset($core_log)}
-		<h6>{$translate->_('Komunikaty')}</h6>
+		<h6>{$i18n->_('Komunikaty')}</h6>
 		<table class="log">
 			{foreach $core_log as $log}
 			<tr>
@@ -15,7 +15,7 @@
 			{/foreach}
 		</table>
 		{/if}
-		<h6>{$translate->_('Status')}</h6>
+		<h6>{$i18n->_('Status')}</h6>
 		<table class="log">
 			<tr>
 				<td>memory_get_usage(true)</td>
