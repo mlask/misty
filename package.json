@@ -1,7 +1,6 @@
 {
   "name": "misty3",
-  "devDependencies": {},
-  "dependencies": {
+  "devDependencies": {
     "@mdi/font": "*",
     "acorn": "^8.6.0",
     "bulma": "*",
@@ -22,5 +21,11 @@
     "sass": "^1.45.1",
     "vinyl-fs": "^3.0.3",
     "yargs-parser": "^21.0.0"
+  },
+  "scripts": {
+    "preinstall": "npx npm-force-resolutions"
+  },
+  "resolutions": {
+    "glob-parent": "^6.0.1"
   }
 }
