@@ -31,6 +31,12 @@ class view
 		$this->smarty->setCaching(\Smarty::CACHING_OFF);
 		
 		// custom modifiers
+		$this->smarty->registerPlugin('modifier', 'fsize', function ($input, $decimals = 2, $class = null) {
+			$input = max(0, (int)$input);
+			$units = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+			$power = $input > 0 ? floor(log($input, 1024)) : 0;
+			return sprintf($class !== null ? '%1$s <span class="%3$s">%2$s</span>' : '%1$s %2$s', number_format($input / pow(1024, $power), $decimals, ',', ' '), $units[$power], $class);
+		});
 		$this->smarty->registerPlugin('modifier', 'ftime', function ($input, $format = '%Y-%m-%d %H:%M:%S') {
 			return strftime($format, $input);
 		});

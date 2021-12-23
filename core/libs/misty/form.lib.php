@@ -66,6 +66,15 @@ class form
 		return $values;
 	}
 	
+	public function get_files ()
+	{
+		$files = [];
+		foreach ($this->fields as $field)
+			if (method_exists($field, 'get_files'))
+				$files[$field->get_name()] = $field->get_files();
+		return $files;
+	}
+	
 	public function on_sent ($callback = null)
 	{
 		if (is_callable($callback))
@@ -95,14 +104,13 @@ class form
 		if (isset($this->$name))
 			return $this->$name;
 		
-		if (preg_match('/^(.+?)__valid$/', $name, $match) && isset($this->fields[$match[1]]))
-			return $this->fields[$match[1]]->is_valid();
-		if (preg_match('/^(.+?)__value$/', $name, $match) && isset($this->fields[$match[1]]))
-			return $this->fields[$match[1]]->get_value();
-		if (preg_match('/^(.+?)__errors$/', $name, $match) && isset($this->fields[$match[1]]))
-			return $this->fields[$match[1]]->get_errors();
-		if (preg_match('/^(.+?)__required$/', $name, $match) && isset($this->fields[$match[1]]))
-			return $this->fields[$match[1]]->is_required();
+		if (preg_match('/^(.+?)__([a-z0-9_]+)$/', $name, $match) && isset($this->fields[$match[1]]))
+		{
+			if (method_exists($this->fields[$match[1]], 'is_' . $match[2]))
+				return $this->fields[$match[1]]->{'is_' . $match[2]}();
+			elseif (method_exists($this->fields[$match[1]], 'get_' . $match[2]))
+				return $this->fields[$match[1]]->{'get_' . $match[2]}();
+		}
 		
 		return null;
 	}

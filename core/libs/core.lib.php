@@ -72,8 +72,8 @@ class core
 		// check required files and directories
 		if (!file_exists(self::$env->path->cache) || !is_writable(self::$env->path->cache))
 			throw new exception(self::$env->i18n->_s('Cache directory not found or not writable: %s', self::$env->path->cache));
-		if (!file_exists(self::$env->path->workspace))
-			throw new exception(self::$env->i18n->_s('Workspace not found: %s', self::$env->path->workspace));
+		if (!file_exists(self::$env->path->absolute . '/' . self::$env->path->workspace))
+			throw new exception(self::$env->i18n->_s('Workspace not found: %s', self::$env->path->absolute . '/' . self::$env->path->workspace));
 		
 		// vendor libs autoloader
 		core::log('initializing vendor preloader...');
@@ -82,8 +82,8 @@ class core
 		
 		// init workspace
 		core::log('initializing workspace...');
-		if (file_exists(self::$env->path->workspace . '/init.php'))
-			require_once(self::$env->path->workspace . '/init.php');
+		if (file_exists(self::$env->path->absolute . '/' . self::$env->path->workspace . '/init.php'))
+			require_once(self::$env->path->absolute . '/' . self::$env->path->workspace . '/init.php');
 	}
 	
 	public static function add (array $items)
@@ -204,11 +204,17 @@ class core
 					'path'		=> dirname($_mm['file']),
 					'action'	=> self::$env->request->action($_mm['default']),
 					'params'	=> new obj,
-					'object'	=> $_mm['ref']->newInstance(...$args),
+					'object'	=> null,
 					'default'	=> self::$env->request->action($_mm['default']) === $_mm['default'],
 					'relpath'	=> ltrim(str_replace(self::$env->path->absolute, '', dirname($_mm['file'])), '/'),
 					'need_auth'	=> isset($_mm['acl']['user']['auth']) && $_mm['acl']['user']['auth']
 				]);
+				
+				// reload i18n, if loaded
+				i18n::reload();
+				
+				// create module object instance
+				self::$env->instance->object = $_mm['ref']->newInstance(...$args);
 			
 				// process module instance
 				if (!isset(self::$env->instance->object->_break) || self::$env->instance->object->_break === false)

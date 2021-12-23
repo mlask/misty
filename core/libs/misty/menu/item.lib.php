@@ -45,7 +45,7 @@ class item
 		{
 			if (isset(\misty\core::env()->user) && \misty\core::env()->user->auth)
 			{
-				$this->submenu = array_filter($this->submenu, function (& $item) {
+				$this->submenu = array_filter($this->submenu, function ($item) {
 					$item_action = $item->get_action(true);
 					return \misty\core::env()->user->has_access($item_action['module'], $item_action['action']);
 				});

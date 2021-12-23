@@ -39,7 +39,7 @@ class menu
 		{
 			if (isset(core::env()->user) && core::env()->user->auth)
 			{
-				$this->menu = array_filter($this->menu, function (& $item) {
+				$this->menu = array_filter($this->menu, function ($item) {
 					$item_action = $item->get_action(true);
 					return core::env()->user->has_access($item_action['module'], $item_action['action']);
 				});
@@ -48,6 +48,7 @@ class menu
 			usort($this->menu, function ($item_a, $item_b) {
 				return $item_a->get_order() > $item_b->get_order() ? 1 : -1;
 			});
+			
 			foreach ($this->menu as & $item)
 				$item->reorder();
 		}

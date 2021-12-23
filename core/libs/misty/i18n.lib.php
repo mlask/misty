@@ -2,7 +2,7 @@
 namespace misty;
 class i18n
 {
-	const default_lang = null;
+	const DEFAULT_LANG = null;
 	
 	private static $instance = null;
 	private $cache = null;
@@ -91,7 +91,7 @@ class i18n
 	
 	private function __construct () 
 	{
-		$this->lang = self::default_lang ?: self::detect(true);
+		$this->lang = self::DEFAULT_LANG ?: self::detect(true);
 		$this->_reload();
 		core::log('initialized i18n with language set to: %s', $this->lang);
 	}

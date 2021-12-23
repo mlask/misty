@@ -106,21 +106,25 @@ class request
 		return $output;
 	}
 	
-	public function replace (array $params = null)
+	public function replace (array $params = null, array $call = null)
 	{
-		if (is_array($params) && !empty($params))
+		if ((is_array($params) && !empty($params)) || (is_array($call) && !empty($call)))
 		{
 			$query = null;
 			$replaced = false;
 			
 			// src module
-			if ($this->req_call->module !== null)
+			if (isset($call['module']))
+				$query[] = $call['module'];
+			elseif ($this->req_call->module !== null)
 				$query[] = $this->req_call->module;
 			elseif (isset(core::env()->instance))
 				$query[] = core::env()->instance->name;
 			
 			// src action
-			if ($this->req_call->action !== null)
+			if (isset($call['action']))
+				$query[] = $call['action'];
+			elseif ($this->req_call->action !== null)
 				$query[] = $this->req_call->action;
 			elseif (isset(core::env()->instance) && !core::env()->instance->default)
 				$query[] = core::env()->instance->action;
@@ -130,6 +134,9 @@ class request
 			{
 				foreach ($this->req_call->iparam as $param)
 				{
+					if (isset($params[$param->name]) && $params[$param->name] === false)
+						continue;
+					
 					$query[] = isset($params[$param->name]) ? sprintf('%s:%s', $param->name, $params[$param->name]) : $param->raw;
 					if (isset($params[$param->name]))
 						unset($params[$param->name]);
@@ -139,7 +146,8 @@ class request
 			// dst params
 			if (!empty($params))
 				foreach ($params as $_name => $_value)
-					$query[] = sprintf('%s:%s', $_name, $_value);
+					if ($_value !== false)
+						$query[] = sprintf('%s:%s', $_name, $_value);
 			
 			return strlen($this->query) > 0 ? str_replace($this->query, implode('/', $query), $this->self) : implode('/', $query);
 		}
@@ -196,8 +204,20 @@ class request
 		// request arguments
 		if (core::env()->cli)
 		{
-			$this->self = array_shift($_SERVER['argv']);
-			$query_args = [implode('/', $_SERVER['argv'])];
+			$argv = $_SERVER['argv'];
+			$nparam = null;
+			
+			$this->self = array_shift($argv);
+			foreach ($argv as $aidx => $arg)
+			{
+				if (preg_match('/^--?(\w+?)(=(.+))?$/', $arg, $argm))
+				{
+					$nparam[$argm[1]] = isset($argm[3]) ? $argm[3] : true;
+					unset($argv[$aidx]);
+				}
+			}
+			
+			$query_args = [implode('/', $argv)];
 		}
 		else
 		{
@@ -265,6 +285,10 @@ class request
 				'nparam'	=> new obj
 			]);
 		}
+		
+		// cli named params
+		if (core::env()->cli && isset($nparam))
+			$this->req_call->nparam = new obj($nparam);
 		
 		// request parameters
 		if ($this->params !== null)

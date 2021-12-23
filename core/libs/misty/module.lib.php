@@ -8,7 +8,7 @@ class module
 	public function __construct (array $libs = null)
 	{
 		// module name
-		$this->name = preg_match('/^misty\\\(.+?)_module$/', get_class($this), $m) ? $m[1] : basename(get_class($this), '_module');
+		$this->name = preg_match('/^misty\\\(.+?)_module$/', get_called_class(), $m) ? $m[1] : basename(get_called_class(), '_module');
 		
 		// additional libs
 		if (!empty($libs))
@@ -16,7 +16,7 @@ class module
 				$this->libs[$name] = $lib;
 		
 		// init function
-		if (is_callable([$this, '__init']))
+		if (method_exists($this, '__init'))
 		{
 			$status = $this->__init();
 			if ($status === false)
