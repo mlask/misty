@@ -3,8 +3,8 @@ namespace misty;
 
 class core
 {
-	const VERSION = 3.20;
-	const VERSION_DATE = 20200527;
+	const VERSION = 3.21;
+	const VERSION_DATE = 20220112;
 	
 	private static $env = null;
 	private static $log = null;
