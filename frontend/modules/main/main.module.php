@@ -1,10 +1,12 @@
 <?php
 namespace misty;
+
+#[attr\user(auth: true)]
+#[attr\defaults(action: "main")]
+#[attr\description("Moduł główny")]
 class main_module extends module
 {
-	const DEFAULT_ACTION = 'main';
-	const DEFAULT_FALLBACK = false;
-	
+	#[attr\description("Główna funkcja modułu")]
 	public function main ()
 	{
 		// main module

@@ -1,10 +1,9 @@
 <?php
 namespace misty;
+
+#[attr\defaults(action: "info", fallback: true)]
 class main_module extends module
 {
-	const DEFAULT_ACTION = 'info';
-	const DEFAULT_FALLBACK = true;
-	
 	public function info ()
 	{
 		$options = [];

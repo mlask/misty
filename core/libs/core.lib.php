@@ -1,5 +1,6 @@
 <?php
 namespace misty;
+
 class core
 {
 	const VERSION = 3.20;
@@ -21,7 +22,7 @@ class core
 		spl_autoload_register(function ($name, $ext = null) {
 			if (file_exists($file = sprintf('%s/%s.lib.php', __DIR__, strtr($name, '\\', '/'))) ||
 				(($lib = $this->_get_lib($name)) !== false && file_exists($file = sprintf('%1$s/%2$ss/%3$s.%2$s.php', $lib['path'], $lib['type'], $lib['name']))))
-				require_once($file);
+				{core::log('autoload: %s', $name);require_once($file);}
 			else
 				core::log('not found for autoload: %s', $name);
 		});
@@ -150,23 +151,23 @@ class core
 			if (class_exists($_mn))
 			{
 				$_mr = new \ReflectionClass($_mn);
+				
+				// module meta
 				$mod[$_mm] = [
-					'acl'		=> null,
 					'ref'		=> $_mr,
+					'attr'		=> null,
 					'file'		=> $_mf,
-					'name'		=> $_mm,
-					'default'	=> defined($_mn . '::DEFAULT_ACTION') ? $_mn::DEFAULT_ACTION : null,
-					'fallback'	=> defined($_mn . '::DEFAULT_FALLBACK') ? $_mn::DEFAULT_FALLBACK : false
+					'name'		=> $_mm
 				];
 				
-				// acl definition
-				if (file_exists($_af = sprintf('%s/%s.acl.php', dirname($_mf), $_mm)))
-					$mod[$_mm]['acl'] = require($_af);
+				// attributes
+				foreach ($_mr->getAttributes() as $_attr)
+					$mod[$_mm]['attr'][str_replace('misty\\attr\\', '', $_attr->getName())] = $_attr->newInstance();
 				
 				// call preload action
 				if ($_mr->hasMethod('__preload'))
 				{
-					if (!isset($mod[$_mm]['acl']['user']['auth']) || $mod[$_mm]['acl']['user']['auth'] === false || ($mod[$_mm]['acl']['user']['auth'] === true && isset(self::$env->user) && self::$env->user->auth && self::$env->user->has_access($_mm)))
+					if (!isset($mod[$_mm]['attr']['user']) || !$mod[$_mm]['attr']['user']->require_auth() || ($mod[$_mm]['attr']['user']->require_auth() && isset(self::$env->user) && self::$env->user->auth && self::$env->user->has_access($_mm)))
 					{
 						$pre = $_mr->getMethod('__preload');
 						$obj = $_mr->newInstanceWithoutConstructor();
@@ -185,13 +186,10 @@ class core
 		if (isset($mod[$_mn]))
 		{
 			$_mm = $mod[$_mn];
-			if (isset($_mm['acl']))
+			if (isset($_mm['attr']['user']) && $_mm['attr']['user']->require_auth() && (!isset(self::$env->user) || !self::$env->user->auth))
 			{
-				if (isset($_mm['acl']['user']['auth']) && $_mm['acl']['user']['auth'] && (!isset(self::$env->user) || !self::$env->user->auth))
-				{
-					core::log('user authorization required to access module "%s"', $_mn);
-					$run = false;
-				}
+				core::log('user authorization required to access module "%s"', $_mn);
+				$run = false;
 			}
 			
 			// create module instance
@@ -202,12 +200,12 @@ class core
 					'name'		=> $_mm['name'],
 					'file'		=> $_mm['file'],
 					'path'		=> dirname($_mm['file']),
-					'action'	=> self::$env->request->action($_mm['default']),
+					'action'	=> self::$env->request->action(isset($_mm['attr']['defaults']) ? $_mm['attr']['defaults']->action() : null),
 					'params'	=> new obj,
 					'object'	=> null,
-					'default'	=> self::$env->request->action($_mm['default']) === $_mm['default'],
+					'default'	=> self::$env->request->action(isset($_mm['attr']['defaults']) ? $_mm['attr']['defaults']->action() : null) === (isset($_mm['attr']['defaults']) ? $_mm['attr']['defaults']->action() : null),
 					'relpath'	=> ltrim(str_replace(self::$env->path->absolute, '', dirname($_mm['file'])), '/'),
-					'need_auth'	=> isset($_mm['acl']['user']['auth']) && $_mm['acl']['user']['auth']
+					'need_auth'	=> isset($_mm['attr']['user']) && $_mm['attr']['user']->require_auth()
 				]);
 				
 				// reload i18n, if loaded
@@ -219,15 +217,15 @@ class core
 				// process module instance
 				if (!isset(self::$env->instance->object->_break) || self::$env->instance->object->_break === false)
 				{
-					if ($_mm['fallback'] && isset($_mm['default']) && (!$_mm['ref']->hasMethod(self::$env->instance->action) || !$_mm['ref']->getMethod(self::$env->instance->action)->isPublic()))
+					if (isset($_mm['attr']['defaults']) && $_mm['attr']['defaults']->fallback() && $_mm['attr']['defaults']->action() !== null && (!$_mm['ref']->hasMethod(self::$env->instance->action) || !$_mm['ref']->getMethod(self::$env->instance->action)->isPublic()))
 					{
 						self::$env->instance->action_requested = self::$env->instance->action;
-						self::$env->instance->action = $_mm['default'];
+						self::$env->instance->action = $_mm['attr']['defaults']->action();
 					}
 					
 					if (self::$env->instance->action !== null)
 					{
-						if ($_mm['fallback'] && (!$_mm['ref']->hasMethod(self::$env->instance->action) || !$_mm['ref']->getMethod(self::$env->instance->action)->isPublic()))
+						if (isset($_mm['attr']['defaults']) && $_mm['attr']['defaults']->fallback() && (!$_mm['ref']->hasMethod(self::$env->instance->action) || !$_mm['ref']->getMethod(self::$env->instance->action)->isPublic()))
 						{
 							$_me = array_filter($_mm['ref']->getMethods(\ReflectionMethod::IS_PUBLIC), function (& $item) {
 								return (isset($item->name) && strpos($item->name, '__') === 0) ? false : true;
@@ -241,7 +239,7 @@ class core
 						if ($_mm['ref']->hasMethod(self::$env->instance->action) && $_mm['ref']->getMethod(self::$env->instance->action)->isPublic())
 						{
 							// check if allowed
-							if (isset($_mm['acl']['user']['auth']) && $_mm['acl']['user']['auth'] && isset(self::$env->user) && self::$env->user->auth && !self::$env->user->has_access($_mm['name'], self::$env->instance->action))
+							if (self::$env->instance->need_auth && isset(self::$env->user) && self::$env->user->auth && !self::$env->user->has_access($_mm['name'], self::$env->instance->action))
 								throw new exception(self::$env->i18n->_s('Access denied: %s', $_mn . '→' . self::$env->instance->action));
 							
 							$_me = $_mm['ref']->getMethod(self::$env->instance->action);
