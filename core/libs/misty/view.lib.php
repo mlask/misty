@@ -10,7 +10,7 @@ class view
 	private $smarty = null;
 	private static $instance = null;
 	
-	public static function load ()
+	public static function load (): ?self
 	{
 		if (self::$instance === null)
 			self::$instance = new static;
@@ -120,7 +120,7 @@ class view
 		ob_start();
 	}
 	
-	public function assets (...$items)
+	public function assets (string ...$items): void
 	{
 		if (is_array($items) && !empty($items))
 		{
@@ -134,6 +134,7 @@ class view
 				
 				$file_path = ($path === 'module' ? core::env()->instance->path . '/js' : core::env()->path->absolute . '/' . core::env()->path->workspace . '/js') . '/' . $item;
 				$file_relpath = ($path === 'module' ? core::env()->instance->relpath . '/js' : core::env()->path->workspace . '/js') . '/' . $item;
+				
 				if (file_exists($file_path))
 				{
 					$info = pathinfo($file_path);
@@ -157,22 +158,23 @@ class view
 		}
 	}
 	
-	public function assign ($variable, $value = null)
+	public function assign (string $variable, mixed $value = null): void
 	{
 		$this->smarty->assign($variable, $value);
 	}
 	
-	public function render ($template, $target = null)
+	public function render (string $template, ?string $target = null): void
 	{
 		$key = null;
 		$template = preg_replace_callback('/\{(.+?)\}/', function (array $m) use (& $key) { $key = $m[1]; return ''; }, $template);
+		
 		if ($key !== null)
 			$this->stack[$target ?: 'content'][$key] = $template;
 		else
 			$this->stack[$target ?: 'content'][] = $template;
 	}
 	
-	public function display ($template)
+	public function display (string $template): void
 	{
 		$this->_preflight();
 		
@@ -184,14 +186,14 @@ class view
 		$this->smarty->display($template);
 	}
 	
-	public function fetch ($template)
+	public function fetch (string $template): ?string
 	{
 		$this->_preflight();
 		
 		return $this->smarty->fetch($template);
 	}
 	
-	public function flush ($template = 'index.tpl')
+	public function flush (string $template = 'index.tpl'): void
 	{
 		$views = [];
 		$this->_preflight();
@@ -225,7 +227,7 @@ class view
 		$this->smarty->display($template);
 	}
 	
-	public function __debugInfo ()
+	public function __debugInfo (): array
 	{
 		return [
 			'stack'		=> $this->stack,
@@ -238,7 +240,7 @@ class view
 		];
 	}
 	
-	private function _preflight ()
+	private function _preflight (): void
 	{
 		// module views
 		if (isset(core::env()->instance))

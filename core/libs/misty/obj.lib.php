@@ -12,12 +12,12 @@ class obj
 		$this->set($data);
 	}
 	
-	public function get ($flags = null)
+	public function get (): array
 	{
 		return $this->data !== null ? $this->data : [];
 	}
 	
-	public function set (array $data = null)
+	public function set (array $data = null): void
 	{
 		if (is_array($data) && !empty($data))
 		{
@@ -31,27 +31,27 @@ class obj
 		}
 	}
 	
-	public function allow ($file)
+	public function allow (string $file): void
 	{
 		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
 		if ($this->origin === $bt['file'])
 			$this->allow[] = $file;
 	}
 	
-	public function reindex ()
+	public function reindex (): void
 	{
 		if (is_array($this->data))
 			$this->data = array_values($this->data);
 	}
 	
-	public function __get ($name)
+	public function __get (string $name): mixed
 	{
 		if (isset($this->data[$name]))
 			return $this->data[$name];
 		return null;
 	}
 	
-	public function __set ($name, $value)
+	public function __set (string $name, mixed $value): void
 	{
 		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
 		if ($this->origin !== $bt['file'] && ($this->allow === null || !in_array($bt['file'], $this->allow)))
@@ -59,18 +59,18 @@ class obj
 		$this->data[$name] = $value;
 	}
 	
-	public function __call ($name, $arguments)
+	public function __call (string $name, array $arguments = null): mixed
 	{
 		if (isset($this->data[$name]) && (is_callable($this->data[$name]) || $this->data[$name] instanceof \Closure))
 			return $this->data[$name](...$arguments);
 	}
 	
-	public function __isset ($name)
+	public function __isset (string $name): bool
 	{
 		return isset($this->data[$name]);
 	}
 	
-	public function __unset ($name)
+	public function __unset (string $name): void
 	{
 		if (isset($this->data[$name]))
 			unset($this->data[$name]);

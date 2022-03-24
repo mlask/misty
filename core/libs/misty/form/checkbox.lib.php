@@ -2,7 +2,7 @@
 namespace misty\form;
 class checkbox extends input
 {
-	public function __construct ($name)
+	public function __construct (string $name)
 	{
 		parent::__construct($name);
 		
@@ -13,14 +13,14 @@ class checkbox extends input
 			}
 			else
 			{
-				if (strlen($value) > 0 && (int)$value > 0)
+				if (strlen($value ?? '') > 0 && (int)$value > 0)
 					return true;
 				return false;
 			}
 		});
 	}
 	
-	public function validate_field (& $request)
+	public function validate_field (\misty\request & $request): void
 	{
 		if ($this->required && (!$request->sent('post', $this->name) || empty($request->post($this->name))))
 		{

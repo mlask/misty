@@ -25,52 +25,52 @@ class request
 		$this->_process();
 	}
 	
-	public static function load ()
+	public static function load (): ?self
 	{
 		return self::$instance;
 	}
 	
-	public function __get ($name)
+	public function __get (string $name): mixed
 	{
 		return isset($this->req_get[$name]) ? $this->req_get[$name] : null;
 	}
 	
-	public function __call ($name, array $args = null)
+	public function __call (string $name, array $args = null): mixed
 	{
 		return isset($this->req_call->{$name}) && !is_object($this->req_call->{$name}) ? $this->req_call->{$name} : (!empty($args) ? array_shift($args) : null);
 	}
 	
-	public function __isset ($name)
+	public function __isset (string $name): bool
 	{
 		return isset($this->req_get[$name]);
 	}
 	
-	public function any (...$args)
+	public function any (string ...$args): mixed
 	{
 		return $this->_get_req('both', ...$args);
 	}
 	
-	public function get (...$args)
+	public function get (string ...$args): mixed
 	{
 		return $this->_get_req('get', ...$args);
 	}
 	
-	public function post (...$args)
+	public function post (string ...$args): mixed
 	{
 		return $this->_get_req('post', ...$args);
 	}
 	
-	public function anyd (...$args)
+	public function anyd (string ...$args): mixed
 	{
 		return $this->_get_req_d('both', ...$args);
 	}
 	
-	public function getd (...$args)
+	public function getd (string ...$args): mixed
 	{
 		return $this->_get_req_d('get', ...$args);
 	}
 	
-	public function sent ($type, ...$args)
+	public function sent (string $type, string ...$args): bool
 	{
 		foreach ($args as $name)
 			if (!isset($this->{'req_' . strtolower($type)}[$name]))
@@ -78,17 +78,17 @@ class request
 		return true;
 	}
 	
-	public function postd (...$args)
+	public function postd (string ...$args): mixed
 	{
 		return $this->_get_req_d('post', ...$args);
 	}
 	
-	public function param ($name, $default = null)
+	public function param (string $name, mixed $default = null): mixed
 	{
 		return isset($this->req_call->nparam->{$name}) ? $this->req_call->nparam->{$name} : (isset($this->req_call->params->{$name}) ? $this->req_call->params->{$name} : $default);
 	}
 	
-	public function params (...$args)
+	public function params (mixed ...$args): array
 	{
 		$output = null;
 		if (is_array($args) && !empty($args))
@@ -106,7 +106,7 @@ class request
 		return $output;
 	}
 	
-	public function replace (array $params = null, array $call = null)
+	public function replace (array $params = null, array $call = null): string
 	{
 		if ((is_array($params) && !empty($params)) || (is_array($call) && !empty($call)))
 		{
@@ -149,12 +149,12 @@ class request
 					if ($_value !== false)
 						$query[] = sprintf('%s:%s', $_name, $_value);
 			
-			return strlen($this->query) > 0 ? str_replace($this->query, implode('/', $query), $this->self) : implode('/', $query);
+			return strlen($this->query ?? '') > 0 ? str_replace($this->query, implode('/', $query), $this->self) : implode('/', $query);
 		}
 		return $this->self;
 	}
 	
-	public function redirect ($addr = '')
+	public function redirect (bool|string $addr = ''): void
 	{
 		while (ob_get_level())
 			ob_end_clean();
@@ -164,7 +164,7 @@ class request
 		exit;
 	}
 	
-	public function add_route (array $route)
+	public function add_route (array $route): void
 	{
 		$this->routes = array_merge((array)$this->routes, $route);
 		foreach ($route as $r_from => $r_to)
@@ -172,29 +172,29 @@ class request
 		$this->_process();
 	}
 	
-	public function get_input ()
+	public function get_input (): ?string
 	{
 		return file_get_contents('php://input');
 	}
 	
-	public function is_method (...$methods)
+	public function is_method (string ...$methods): bool
 	{
 		return isset($_SERVER['REQUEST_METHOD']) ? in_array(strtoupper($_SERVER['REQUEST_METHOD']), array_map(function ($item) { return strtoupper($item); }, $methods)) : false;
 	}
 	
-	public function get_method ()
+	public function get_method (): ?string
 	{
 		return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
 	}
 	
-	public function processing ($toggle = true)
+	public function processing (bool $toggle = true): void
 	{
 		$this->processing = $toggle;
 		if ($toggle)
 			$this->_process();
 	}
 	
-	private function _process ()
+	private function _process (): void
 	{
 		if (!$this->processing)
 			return;
@@ -224,7 +224,7 @@ class request
 			$this->self = $_SERVER['REQUEST_URI'];
 			$query_args = explode('?', $_SERVER['REQUEST_URI'], 3);
 			if (!empty($query_args))
-				$query_args[0] = substr(urldecode($query_args[0]), strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/')) + 1);
+				$query_args[0] = substr(urldecode($query_args[0]), strlen(rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '\/')) + 1);
 		}
 		
 		// xmlhttprequest
@@ -310,7 +310,7 @@ class request
 		unset($qs);
 	}
 	
-	private function _get_req ($type, ...$args)
+	private function _get_req (string $type, string ...$args): mixed
 	{
 		if (!empty($args))
 		{
@@ -321,7 +321,7 @@ class request
 		return null;
 	}
 	
-	private function _get_req_d ($type, ...$args)
+	private function _get_req_d (string $type, string ...$args): mixed
 	{
 		if (is_array($args) && !empty($args))
 		{

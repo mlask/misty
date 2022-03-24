@@ -2,7 +2,7 @@
 namespace misty;
 class exception extends \exception
 {
-	public function __construct ($message = null, $file = null, $line = null)
+	public function __construct (string $message = null, string $file = null, int $line = null)
 	{
 		if ($file !== null)
 			$this->file = $file;

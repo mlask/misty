@@ -6,7 +6,7 @@ class config
 	private $_loaded = false;
 	private $_config = null;
 	
-	public static function load ()
+	public static function load (): ?self
 	{
 		if (!defined('\misty\core::VERSION'))
 			throw new exception('Cannot load configuration without misty core!');
@@ -16,19 +16,19 @@ class config
 		return self::$instance;
 	}
 	
-	public function get ($name, $default = null)
+	public function get (string $name, mixed $default = null): mixed
 	{
 		return isset($this->_config[$name]) ? $this->_config[$name] : $default;
 	}
 	
-	public function get_all ($match = null)
+	public function get_all (bool $match = null): \generator
 	{
 		foreach ((new ReflectionObject($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $property)
 			if ($match === null || preg_match($match, $property->name))
 				yield $property->name => json_decode(json_encode($this->{$property->name}), true);
 	}
 	
-	public function is_loaded ()
+	public function is_loaded (): bool
 	{
 		return $this->_loaded;
 	}
@@ -56,7 +56,7 @@ class config
 		}
 	}
 	
-	private function _config_map ($input = null, & $target = null, $prefix = null)
+	private function _config_map (mixed $input = null, mixed & $target = null, ?string $prefix = null): \generator
 	{
 		if (is_array($input))
 		{

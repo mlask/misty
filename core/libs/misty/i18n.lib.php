@@ -9,20 +9,20 @@ class i18n
 	private $data = null;
 	private $lang = null;
 	
-	public static function load ()
+	public static function load (): ?self
 	{
 		if (self::$instance === null)
 			self::$instance = new static;
 		return self::$instance;
 	}
 	
-	public static function reload ()
+	public static function reload (): void
 	{
 		if (self::$instance !== null)
 			self::$instance->_reload();
 	}
 	
-	public static function lang ($lang = false)
+	public static function lang (string|bool $lang = false): mixed
 	{
 		if ($lang === false)
 		{
@@ -33,13 +33,15 @@ class i18n
 		{
 			if (self::$instance === null)
 				self::$instance = new static;
+			
 			self::$instance->lang = $lang;
 			return self::$instance;
 		}
+		
 		return false;
 	}
 	
-	public static function detect ($primary = false)
+	public static function detect (bool $primary = false): mixed
 	{
 		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && strlen($_SERVER['HTTP_ACCEPT_LANGUAGE']) > 0)
 		{
@@ -53,12 +55,13 @@ class i18n
 					return array_column($l, 1, 0);
 			}
 		}
+		
 		return null;
 	}
 	
 	/* ---------- Funkcje publiczne ---------- */
 	
-	public function _ (...$a)
+	public function _ (mixed ...$a): string
 	{
 		$l = [
 			'label'	=> (count($a) > 0 ? array_shift($a) : null),
@@ -67,7 +70,7 @@ class i18n
 		return $l['lang'] === null ? $this->_cleanup($l['label']) : (isset($this->data[$l['lang']][$l['label']]) ? $this->data[$l['lang']][$l['label']] : $this->_cleanup($l['label']));
 	}
 	
-	public function _s (...$a)
+	public function _s (mixed ...$a): string
 	{
 		$l = [
 			'label'	=> (count($a) > 0 ? array_shift($a) : null),
@@ -77,7 +80,7 @@ class i18n
 		return vsprintf($l['lang'] === null ? $this->_cleanup($l['label']) : (isset($this->data[$l['lang']][$l['label']]) ? $this->data[$l['lang']][$l['label']] : $this->_cleanup($l['label'])), $l['vars']);
 	}
 	
-	public function _sl (...$a)
+	public function _sl (mixed ...$a): string
 	{
 		$l = [
 			'label'	=> (count($a) > 0 ? array_shift($a) : null),
@@ -96,14 +99,14 @@ class i18n
 		core::log('initialized i18n with language set to: %s', $this->lang);
 	}
 	
-	private function _cleanup ($input)
+	private function _cleanup (string $input): string
 	{
 		if (($pos = strpos($input, ' ~~')) !== false)
 			return substr($input, 0, $pos);
 		return $input;
 	}
 	
-	protected function _reload ()
+	protected function _reload (): void
 	{
 		// globalne pliki językowe
 		foreach (glob(core::env()->path->core . '/i18n/*.lang.php') as $lang)

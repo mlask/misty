@@ -31,7 +31,7 @@ class db
 		$this->_init_pdo();
 	}
 	
-	public static function load (array $config)
+	public static function load (array $config): ?self
 	{
 		$id = md5(json_encode($config));
 		if (!isset(self::$instances[$id]))
@@ -41,89 +41,76 @@ class db
 	
 	/* ---------- Funkcje publiczne ---------- */
 	
-	public function query (...$args)
+	public function query (mixed ...$args): mixed
 	{
 		return $this->pdo ? $this->pdo->query($this->_build_query(...$args)) : false;
 	}
 	
-	public function query_simple (...$args)
+	public function query_simple (mixed ...$args): mixed
 	{
 		return $this->pdo ? $this->pdo->exec($this->_build_query(...$args)) : false;
 	}
 	
-	public function get_row (...$args)
+	public function get_row (mixed ...$args): mixed
 	{
 		if (!$this->pdo)
 			return false;
 		
-		$query = $this->pdo->query($this->_build_query(...$args));
-		$row = $query->fetch(\PDO::FETCH_ASSOC);
-		$query = null;
-		return $row;
+		return ($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_ASSOC))->fetch();
 	}
 	
-	public function get_col (...$args)
+	public function get_col (mixed ...$args): mixed
 	{
 		if (!$this->pdo)
 			return false;
 		
-		$query = $this->pdo->query($this->_build_query(...$args));
-		$cols = [];
-		while (($col = $query->fetchColumn()) !== false) $cols[] = $col;
-		$query = null;
-		return $cols;
+		return array_column(($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_ASSOC))->fetchAll() ?? [], 0);
 	}
 	
-	public function get_array (...$args)
+	public function get_array (mixed ...$args): mixed
 	{
 		if (!$this->pdo)
 			return false;
 		
-		$query = $this->pdo->query($this->_build_query(...$args));
-		$array = $query->fetchAll(\PDO::FETCH_ASSOC);
-		$query = null;
-		return $array;
+		return ($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_ASSOC))->fetchAll();
 	}
 	
-	public function get_field (...$args)
+	public function get_field (mixed ...$args): mixed
 	{
 		if (!$this->pdo)
 			return false;
 		
-		$query = $this->pdo->query($this->_build_query(...$args));
-		$row = $query->fetch(\PDO::FETCH_NUM);
-		$query = null;
-		return is_array($row) ? array_shift($row) : false;
+		return ($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_NUM))->fetch()[0] ?? false;
 	}
 	
-	public function preview_query (...$args)
+	public function preview_query (mixed ...$args): string
 	{
 		return $this->_build_query(...$args);
 	}
 	
-	public function transaction_start ($options = null)
+	public function transaction_start (string $options = null): void
 	{
 		$this->query_simple('START TRANSACTION' . ($options !== null ? ' ' . $options : ''));
 	}
 	
-	public function transaction_commit ()
+	public function transaction_commit (): void
 	{
 		$this->query_simple('COMMIT');
 	}
 	
-	public function transaction_rollback ()
+	public function transaction_rollback (): void
 	{
 		$this->query_simple('ROLLBACK');
 	}
 	
-	public function affected_rows (\PDOStatement $query)
+	public function affected_rows (\PDOStatement $query): int
 	{
 		return $query->rowCount();
 	}
 	
 	/* ---------- Funkcje prywatne ---------- */
 	
-	private function _init_pdo ()
+	private function _init_pdo (): void
 	{
 		try
 		{
@@ -158,7 +145,7 @@ class db
 		}
 	}
 	
-	private function _pdo_dsn (array $dsnc)
+	private function _pdo_dsn (array $dsnc): string
 	{
 		$dsn = null;
 		foreach ($dsnc as $_dk => $_dv)
@@ -167,7 +154,7 @@ class db
 		return implode(';', $dsn);
 	}
 	
-	private function _flatten (array $array, $index = 0, $prefix = null)
+	private function _flatten (array $array, ?int $index = 0, ?string $prefix = null): \generator
 	{
 		foreach ($array as $_k => $_v)
 		{
@@ -179,7 +166,7 @@ class db
 		}
 	}
 	
-	private function _quote ($input, $type = null)
+	private function _quote (mixed $input, int $type = null): string
 	{
 		if ($type === null && (gettype($input) === 'integer' || gettype($input) === 'boolean'))
 			return (int)$input;
@@ -187,7 +174,7 @@ class db
 		return $this->pdo ? $this->pdo->quote($input, $type === null ? \PDO::PARAM_STR : $type) : sprintf('\'%s\'', addcslashes($input, '\''));
 	}
 	
-	private function _build_query (...$args)
+	private function _build_query (mixed ...$args): string
 	{
 		// if empty
 		if (count($args) === 0)
@@ -218,11 +205,11 @@ class db
 		if (strpos($sql, '/*{{') !== false)
 			$sql = $this->_conditionals($sql);
 		
-		core::log('sql: %s', $sql);
+		core::log('sql: %s', $sql, ['level' => 3]);
 		return $sql;
 	}
 	
-	private function _replace_tag ($tag, array $params = null)
+	private function _replace_tag (array $tag, array $params = null): string
 	{
 		$tag = explode('|', $tag[1]);
 		$key = array_shift($tag);
@@ -302,7 +289,7 @@ class db
 		return $out === null ? 'NULL' : $out;
 	}
 	
-	private function _conditionals ($input)
+	private function _conditionals (string $input): string
 	{
 		// prosty parser instrukcji warunkowych, obsługujący poprawnie zagnieżdżone warunki
 		$tags = $repl = [];
@@ -317,7 +304,7 @@ class db
 		return isset($repl[1]) ? strtr($input, $repl[1]) : $input;
 	}
 
-	private function _conditionals_replace (array $input)
+	private function _conditionals_replace (array $input): mixed
 	{
 		core::log('db conditional: %s', $input[1]);
 		if (eval('return (' . $input[1] . ');'))

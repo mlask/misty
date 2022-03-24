@@ -2,12 +2,8 @@
 namespace misty;
 new class
 {
-	private $view = null;
-	
 	public function __construct ()
 	{
-		$mod = null;
-		
 		// no output buffering AT ALL!
 		while (ob_get_level())
 			ob_end_clean();

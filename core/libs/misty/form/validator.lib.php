@@ -2,11 +2,11 @@
 namespace misty\form;
 class validator
 {
-	public function date ($message = null)
+	public function date (?string $message = null): callable
 	{
 		return function (& $field) use ($message)
 		{
-			if (strlen($field->get_value(true)) > 0)
+			if (strlen($field->get_value(true) ?? '') > 0)
 			{
 				$valid = true;
 				
@@ -32,11 +32,11 @@ class validator
 		};
 	}
 	
-	public function email ($message = null)
+	public function email (?string $message = null): callable
 	{
 		return function (& $field) use ($message)
 		{
-			if (strlen($field->get_value(true)) > 0 && !preg_match('/^(?!(?:(?:\x22?\x5C[\x00-\x7E]\x22?)|(?:\x22?[^\x5C\x22]\x22?)){255,})(?!(?:(?:\x22?\x5C[\x00-\x7E]\x22?)|(?:\x22?[^\x5C\x22]\x22?)){65,}@)(?:(?:[\x21\x23-\x27\x2A\x2B\x2D\x2F-\x39\x3D\x3F\x5E-\x7E]+)|(?:\x22(?:[\x01-\x08\x0B\x0C\x0E-\x1F\x21\x23-\x5B\x5D-\x7F]|(?:\x5C[\x00-\x7F]))*\x22))(?:\.(?:(?:[\x21\x23-\x27\x2A\x2B\x2D\x2F-\x39\x3D\x3F\x5E-\x7E]+)|(?:\x22(?:[\x01-\x08\x0B\x0C\x0E-\x1F\x21\x23-\x5B\x5D-\x7F]|(?:\x5C[\x00-\x7F]))*\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-[a-z0-9]+)*\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-[a-z0-9]+)*)|(?:\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\]))$/iD', $field->get_value(true)))
+			if (strlen($field->get_value(true) ?? '') > 0 && !preg_match('/^(?!(?:(?:\x22?\x5C[\x00-\x7E]\x22?)|(?:\x22?[^\x5C\x22]\x22?)){255,})(?!(?:(?:\x22?\x5C[\x00-\x7E]\x22?)|(?:\x22?[^\x5C\x22]\x22?)){65,}@)(?:(?:[\x21\x23-\x27\x2A\x2B\x2D\x2F-\x39\x3D\x3F\x5E-\x7E]+)|(?:\x22(?:[\x01-\x08\x0B\x0C\x0E-\x1F\x21\x23-\x5B\x5D-\x7F]|(?:\x5C[\x00-\x7F]))*\x22))(?:\.(?:(?:[\x21\x23-\x27\x2A\x2B\x2D\x2F-\x39\x3D\x3F\x5E-\x7E]+)|(?:\x22(?:[\x01-\x08\x0B\x0C\x0E-\x1F\x21\x23-\x5B\x5D-\x7F]|(?:\x5C[\x00-\x7F]))*\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-[a-z0-9]+)*\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-[a-z0-9]+)*)|(?:\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\]))$/iD', $field->get_value(true)))
 			{
 				$field->has_error($message !== null ? $message : \misty\i18n::load()->_('Invalid e-mail address format'));
 				return false;
@@ -45,11 +45,11 @@ class validator
 		};
 	}
 	
-	public function phone ($message = null)
+	public function phone (?string $message = null): callable
 	{
 		return function (& $field) use ($message)
 		{
-			if (strlen($field->get_value(true)) > 0 && !preg_match('/^[0-9+]{0,16}$/', $field->get_value(true)))
+			if (strlen($field->get_value(true) ?? '') > 0 && !preg_match('/^[0-9+]{0,16}$/', $field->get_value(true)))
 			{
 				$field->has_error($message !== null ? $message : \misty\i18n::load()->_('Invalid phone number format'));
 				return false;
@@ -58,11 +58,11 @@ class validator
 		};
 	}
 	
-	public function regex ($regex, $message = null)
+	public function regex (string $regex, ?string $message = null): callable
 	{
 		return function (& $field) use ($regex, $message)
 		{
-			if (strlen($field->get_value(true)) > 0 && !preg_match($regex, $field->get_value(true)))
+			if (strlen($field->get_value(true) ?? '') > 0 && !preg_match($regex, $field->get_value(true)))
 			{
 				$field->has_error($message !== null ? $message : \misty\i18n::load()->_('Invalid value format'));
 				return false;
@@ -71,11 +71,11 @@ class validator
 		};
 	}
 	
-	public function numeric ($message = null)
+	public function numeric (?string $message = null): callable
 	{
 		return function (& $field) use ($message)
 		{
-			if (strlen($field->get_value(true)) > 0 && !is_numeric($field->get_value(true)))
+			if (strlen($field->get_value(true) ?? '') > 0 && !is_numeric($field->get_value(true)))
 			{
 				$field->has_error($message !== null ? $message : \misty\i18n::load()->_('Non-numeric value'));
 				return false;

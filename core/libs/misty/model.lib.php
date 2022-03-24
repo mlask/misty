@@ -13,7 +13,7 @@ class model
 			$this->__init(...$args);
 	}
 	
-	public static function load ()
+	public static function load (): ?self
 	{
 		$_class = get_called_class();
 		if (!isset(self::$instance[$_class]) || self::$instance[$_class] === null)

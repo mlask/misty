@@ -1,6 +1,5 @@
 <?php
 namespace misty;
-
 class module
 {
 	private $libs = null;
@@ -25,7 +24,7 @@ class module
 		}
 	}
 	
-	public function __get ($name)
+	public function __get (string $name): mixed
 	{
 		if (isset($this->libs[$name]))
 			return $this->libs[$name];

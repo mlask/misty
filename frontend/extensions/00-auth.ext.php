@@ -128,6 +128,9 @@ new class
 			catch (\exception $e)
 			{
 				$user->status = 'db_connection_error';
+				
+				// dump auth exception
+				print_r($e);
 			}
 			
 			$auth = null;
@@ -188,7 +191,7 @@ new class
 		});
 	}
 	
-	private function get_acl (db $db, & $auth)
+	private function get_acl (\misty\db $db, array & $auth): ?array
 	{
 		$uacl = $db->get_array("SELECT
 				mua.acl_module,

@@ -14,24 +14,24 @@ class file
 	protected $allow_mime_type = null;
 	
 	// konstruktur
-	public function __construct ($name, $multiple = false)
+	public function __construct (string $name, bool $multiple = false)
 	{
 		$this->name = $name;
 		$this->multiple = $multiple;
 	}
 	
 	// pobieranie stanu
-	public final function get_form ()
+	public final function get_form (): \misty\form
 	{
 		return $this->form;
 	}
 	
-	public final function get_name ()
+	public final function get_name (): ?string
 	{
 		return $this->name;
 	}
 	
-	public final function get_files ()
+	public final function get_files (): ?array
 	{
 		$output = null;
 		if ($this->multiple === true)
@@ -61,74 +61,74 @@ class file
 		return $output;
 	}
 	
-	public final function get_value ($no_formatter = false)
+	public final function get_value (bool $no_formatter = false): mixed
 	{
 		return $this->value;
 	}
 	
-	public final function get_errors ()
+	public final function get_errors (): mixed
 	{
 		return $this->errors;
 	}
 	
-	public final function get_allowed_mime_type ()
+	public final function get_allowed_mime_type (): string
 	{
 		return is_array($this->allow_mime_type) && !empty($this->allow_mime_type) ? implode(',', $this->allow_mime_type) : '*/*';
 	}
 	
-	public final function is_valid ()
+	public final function is_valid (): bool
 	{
 		return (int)$this->valid === 1;
 	}
 	
-	public final function is_required()
+	public final function is_required(): bool
 	{
 		return $this->required;
 	}
 	
-	public final function can_overwrite ()
+	public final function can_overwrite (): bool
 	{
 		return $this->overwrite;
 	}
 	
 	// ustawienie stanu
-	public final function multiple ($multiple = true)
+	public final function multiple (bool $multiple = true): self
 	{
 		$this->multiple = true;
 		return $this;
 	}
 	
-	public final function required ($required = true)
+	public final function required (bool $required = true): self
 	{
 		$this->required = $required;
 		return $this;
 	}
 	
-	public final function overwrite ($overwrite = true)
+	public final function overwrite (bool $overwrite = true): self
 	{
 		$this->overwrite = $overwrite;
 		return $this;
 	}
 	
-	public final function has_error ($message)
+	public final function has_error (string $message): self
 	{
 		$this->errors[] = $message;
 		return $this;
 	}
 	
-	public final function with_value ($value = null)
+	public final function with_value (mixed $value = null): self
 	{
 		$this->value = $value;
 		return $this;
 	}
 	
-	public final function max_size ($max_size = null)
+	public final function max_size (?int $max_size = null): self
 	{
 		$this->max_size = $max_size;
 		return $this;
 	}
 	
-	public final function allow_mime_type (...$mime_types)
+	public final function allow_mime_type (string ...$mime_types): self
 	{
 		if (is_array($mime_types) && !empty($mime_types))
 			$this->allow_mime_type = $mime_types;
@@ -136,7 +136,7 @@ class file
 	}
 	
 	// dopięcie do formularza
-	public final function attach (& $form)
+	public final function attach (\misty\form & $form): self
 	{
 		if ($this->form === null)
 			$this->form = $form;
@@ -144,7 +144,7 @@ class file
 	}
 	
 	// walidacja
-	public final function validate (& $request)
+	public final function validate (\misty\request & $request): bool
 	{
 		if ($this->multiple === true)
 		{
@@ -239,5 +239,8 @@ class file
 	}
 	
 	// aliasy funkcji
-	public final function set_value (...$args) { $this->with_value(...$args); }
+	public final function set_value (mixed ...$args): void
+	{
+		$this->with_value(...$args);
+	}
 };

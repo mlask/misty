@@ -274,7 +274,7 @@ class format
 		'Ż' => 'Z˙'
 	];
 	
-	public static function page (int $page_number = 1, int $total_items = 1)
+	public static function page (int $page_number = 1, int $total_items = 1): ?array
 	{
 		$page_items = 25;
 		$pages_margin = 2;
@@ -321,10 +321,11 @@ class format
 				]
 			]);
 		}
+		
 		return null;
 	}
 	
-	public static function numeral (int $num, array $text, $wn = false)
+	public static function numeral (int $num, array $text, bool $wn = false): string
 	{
 		$out = $wn ? [] : [$num];
 		if ((int)$num === 1 && isset($text[1]))
@@ -336,7 +337,7 @@ class format
 		return implode(' ', $out);
 	}
 	
-	public static function filter_recursive (array $input, $callback = null, int $flag = 0)
+	public static function filter_recursive (array $input, callable $callback = null, int $flag = 0): array
 	{
 		foreach ($input as & $value)
 			if (is_array($value))
@@ -344,7 +345,7 @@ class format
 		return $callback !== null ? array_filter($input, $callback, $flag) : array_filter($input);
 	}
 	
-	public static function explode_string_values ($input = '', $item_separator = ';', $value_separator = '=', array $array_map = null, $array_map_separator = '|')
+	public static function explode_string_values (string $input = '', string $item_separator = ';', string $value_separator = '=', ?array $array_map = null, string $array_map_separator = '|'): ?array
 	{
 		$output = null;
 		if (strlen($input) > 0)

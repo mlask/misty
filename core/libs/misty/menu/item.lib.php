@@ -7,24 +7,24 @@ class item
 	private $action = null;
 	private $submenu = null;
 	
-	public function __construct ($name, $action = null)
+	public function __construct (string $name, ?string $action = null)
 	{
 		$caller = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2]['class'];
 		$this->name = $name;
 		$this->action = $action === null ? (preg_match('/^misty\\\(.+?)_module$/', $caller, $match) ? $match[1] : './') : $action;
 	}
 	
-	public function __get ($name)
+	public function __get (string $name): mixed
 	{
 		return isset($this->{$name}) ? $this->{$name} : null;
 	}
 	
-	public function __isset ($name)
+	public function __isset (string $name): bool
 	{
 		return isset($this->{$name});
 	}
 	
-	public function add (...$items)
+	public function add (\misty\menu\item ...$items): self
 	{
 		if (!empty($items))
 			foreach ($items as & $item)
@@ -33,13 +33,13 @@ class item
 		return $this;
 	}
 	
-	public function clear ()
+	public function clear (): self
 	{
 		$this->submenu = null;
 		return $this;
 	}
 	
-	public function reorder ()
+	public function reorder (): void
 	{
 		if (is_array($this->submenu) && !empty($this->submenu))
 		{
@@ -59,12 +59,12 @@ class item
 		}
 	}
 	
-	public function get_order ()
+	public function get_order (): float
 	{
 		return (int)$this->order;
 	}
 	
-	public function get_action ($split = false)
+	public function get_action (bool $split = false): mixed
 	{
 		if ($split)
 		{
@@ -74,13 +74,13 @@ class item
 		return $this->action;
 	}
 	
-	public function set_order ($value = 0)
+	public function set_order (float $value = 0): self
 	{
 		$this->order = $value;
 		return $this;
 	}
 	
-	public function set_badge ($value = null)
+	public function set_badge (mixed $value = null): self
 	{
 		$this->badge = $value;
 		return $this;

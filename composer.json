@@ -4,6 +4,6 @@
         "htaccess-protect": false
     },
     "require": {
-        "smarty/smarty": "^3.1"
+        "smarty/smarty": "^4.1"
     }
 }

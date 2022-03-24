@@ -7,7 +7,7 @@ namespace misty;
 class main_module extends module
 {
 	#[attr\description("Główna funkcja modułu")]
-	public function main ()
+	public function main (): void
 	{
 		// main module
 		$this->view->render('[module]main.tpl');

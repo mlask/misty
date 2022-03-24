@@ -4,7 +4,7 @@ namespace misty;
 #[attr\defaults(action: "info", fallback: true)]
 class main_module extends module
 {
-	public function info ()
+	public function info (): void
 	{
 		$options = [];
 		

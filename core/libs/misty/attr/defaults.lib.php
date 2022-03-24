@@ -8,12 +8,12 @@ class defaults
 	{
 	}
 	
-	public function action ()
+	public function action (): ?string
 	{
 		return $this->action;
 	}
 	
-	public function fallback ()
+	public function fallback (): bool
 	{
 		return $this->fallback;
 	}

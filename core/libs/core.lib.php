@@ -11,9 +11,13 @@ class core
 	private static $mem = null;
 	private static $run = null;
 	
-	public function __construct ($workspace = null)
+	public function __construct (string $workspace = null)
 	{
+		// log
 		core::log('__construct: %s', $workspace);
+		
+		// error reporting
+		error_reporting(E_ALL);
 		
 		// preconfiguration
 		ini_set('xdebug.var_display_max_depth', 16);
@@ -22,7 +26,7 @@ class core
 		spl_autoload_register(function ($name, $ext = null) {
 			if (file_exists($file = sprintf('%s/%s.lib.php', __DIR__, strtr($name, '\\', '/'))) ||
 				(($lib = $this->_get_lib($name)) !== false && file_exists($file = sprintf('%1$s/%2$ss/%3$s.%2$s.php', $lib['path'], $lib['type'], $lib['name']))))
-				{core::log('autoload: %s', $name);require_once($file);}
+				require_once($file);
 			else
 				core::log('not found for autoload: %s', $name);
 		});
@@ -87,27 +91,28 @@ class core
 			require_once(self::$env->path->absolute . '/' . self::$env->path->workspace . '/init.php');
 	}
 	
-	public static function add (array $items)
+	public static function add (array $items): void
 	{
 		foreach ($items as $key => $value)
 			if (!isset(self::$env->{$key}))
 				self::$env->{$key} = $value;
 	}
 	
-	public static function env ()
+	public static function env (): ?\misty\obj
 	{
 		return self::$env;
 	}
 	
-	public static function log (...$message)
+	public static function log (mixed ...$message): ?array
 	{
 		if (count($message) > 0)
 		{
 			$mem = memory_get_usage();
+			$opt = is_array($message[count($message) - 1]) ? array_pop($message) : null;
 			self::$log[] = [
 				'time'		=> microtime(true),
 				'memory'	=> self::$mem !== null ? $mem - self::$mem : $mem,
-				'source'	=> debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0],
+				'source'	=> debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, ($lvl = $opt['level'] ?? 1))[$lvl - 1],
 				'message'	=> count($message) > 1 ? vsprintf(array_shift($message), $message) : array_shift($message)
 			];
 			self::$mem = $mem;
@@ -117,7 +122,7 @@ class core
 		return self::$log;
 	}
 	
-	public static function run ($module, ...$args)
+	public static function run (string $module, mixed ...$args): void
 	{
 		$mod = null;
 		$run = true;
@@ -129,8 +134,8 @@ class core
 		core::log('processing extensions...');
 		foreach (array_merge(glob(self::$env->path->core . '/extensions/*.ext.php'), glob(self::$env->path->absolute . '/' . self::$env->path->workspace . '/extensions/*.ext.php')) as $_if)
 		{
-			require_once($_if);
 			core::log('loaded extension: %s', $_if);
+			require_once($_if);
 		}
 		
 		// run after "extensions"
@@ -265,7 +270,7 @@ class core
 		self::_run_after('module');
 	}
 	
-	private function _get_lib ($name)
+	private function _get_lib (string $name): mixed
 	{
 		if (isset(self::$env->path->core))
 		{
@@ -276,7 +281,7 @@ class core
 		return false;
 	}
 	
-	private static function _run_after ($event)
+	private static function _run_after (string $event): void
 	{
 		core::log('_run_after: %s', $event);
 		

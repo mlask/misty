@@ -2,18 +2,15 @@
 namespace misty;
 new class
 {
-	private $view = null;
-	
 	public function __construct ()
 	{
-		$mod = null;
-		$this->view = view::load();
+		$view = view::load();
 		
 		// "do, or do not, there's no..."
 		try
 		{
 			core::run('main', [
-				'view'		=> $this->view,
+				'view'		=> $view,
 				'menu'		=> menu::load(),
 				'request'	=> request::load()
 			]);
@@ -21,18 +18,18 @@ new class
 		catch (\Exception $e)
 		{
 			// exception to view
-			$this->view->assign('core_exception', $e);
+			$view->assign('core_exception', $e);
 		}
 		catch (\Throwable $t)
 		{
 			// throwable to view
-			$this->view->assign('core_exception', $t);
+			$view->assign('core_exception', $t);
 		}
 		
 		// update i18n data
 		i18n::reload();
 		
 		// output view
-		$this->view->flush();
+		$view->flush();
 	}
 };

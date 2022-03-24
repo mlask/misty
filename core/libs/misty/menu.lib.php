@@ -5,14 +5,14 @@ class menu
 	private static $instance = null;
 	private $menu = null;
 	
-	public static function load ()
+	public static function load (): ?self
 	{
 		if (self::$instance === null)
 			self::$instance = new static;
 		return self::$instance;
 	}
 	
-	public static function __callStatic ($name, $args)
+	public static function __callStatic (string $name, array $args = null): mixed
 	{
 		if (class_exists($class = '\\misty\\menu\\' . $name))
 			return new $class(...$args);
@@ -24,7 +24,7 @@ class menu
 		core::env()->set(['menu' => $this]);
 	}
 	
-	public function add (...$items)
+	public function add (\misty\menu\item ...$items): self
 	{
 		if (!empty($items))
 			foreach ($items as & $item)
@@ -33,7 +33,7 @@ class menu
 		return $this;
 	}
 	
-	public function get ()
+	public function get (): ?self
 	{
 		if (is_array($this->menu) && !empty($this->menu))
 		{
@@ -52,12 +52,14 @@ class menu
 			foreach ($this->menu as & $item)
 				$item->reorder();
 		}
+		
 		return $this->menu;
 	}
 	
-	public function clear ()
+	public function clear (): self
 	{
 		$this->menu = null;
+		
 		return $this;
 	}
 };

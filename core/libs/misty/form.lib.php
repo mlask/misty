@@ -8,7 +8,7 @@ class form
 	private $fields = [];
 	private $id = null;
 	
-	public function __construct (...$fields)
+	public function __construct (mixed ...$fields)
 	{
 		$source = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[array_key_last(array_column(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), 'function'))];
 		$this->id = sprintf('form.%s.%s', md5($source['file']), sha1(json_encode($source)));
@@ -19,7 +19,7 @@ class form
 			$this->add(...$fields);
 	}
 	
-	public function add (...$fields)
+	public function add (mixed ...$fields): self
 	{
 		foreach ($fields as $field)
 		{
@@ -31,7 +31,7 @@ class form
 		return $this;
 	}
 	
-	public function get ($name)
+	public function get (string $name): mixed
 	{
 		if (isset($this->fields[$name]))
 			return $this->fields[$name];
@@ -39,26 +39,26 @@ class form
 			throw new exception(i18n::load()->_s('Unknown form field: %s', $name));
 	}
 	
-	public function reset ()
+	public function reset (): self
 	{
 		$this->is_valid = false;
 		$this->fields = [];
 		return $this;
 	}
 	
-	public function get_id ()
+	public function get_id (): string
 	{
 		return $this->id;
 	}
 	
-	public function get_value ($name, $formatted = false)
+	public function get_value (string $name, bool $formatted = false): mixed
 	{
 		if (isset($this->fields[$name]))
 			return $this->fields[$name]->get_value(!$formatted);
 		return null;
 	}
 	
-	public function get_values ($formatted = false)
+	public function get_values (bool $formatted = false): array
 	{
 		$values = [];
 		foreach ($this->fields as $field)
@@ -66,7 +66,7 @@ class form
 		return $values;
 	}
 	
-	public function get_files ()
+	public function get_files (): array
 	{
 		$files = [];
 		foreach ($this->fields as $field)
@@ -75,7 +75,7 @@ class form
 		return $files;
 	}
 	
-	public function on_sent ($callback = null)
+	public function on_sent (?callable $callback = null): self
 	{
 		if (is_callable($callback))
 		{
@@ -86,7 +86,7 @@ class form
 		return $this;
 	}
 	
-	public function validate ()
+	public function validate (): bool
 	{
 		if ($this->is_sent)
 		{
@@ -99,7 +99,7 @@ class form
 		return $this->is_valid;
 	}
 	
-	public function __get ($name)
+	public function __get (string $name): mixed
 	{
 		if (isset($this->$name))
 			return $this->$name;
@@ -115,12 +115,12 @@ class form
 		return null;
 	}
 	
-	public function __isset ($name)
+	public function __isset (string $name): bool
 	{
 		return isset($this->fields[$name]);
 	}
 	
-	public function __call ($name, $args)
+	public function __call (string $name, ?array $args = null): mixed
 	{
 		if (count($args) > 0)
 		{
@@ -133,13 +133,13 @@ class form
 			throw new exception(i18n::load()->_s('Call to undefined form method: %s', $name));
 	}
 	
-	public static function __callStatic ($name, $args)
+	public static function __callStatic (string $name, ?array $args = null): mixed
 	{
 		if (class_exists($class = '\\misty\\form\\' . $name))
 			return new $class(...$args);
 	}
 	
-	public static function create (...$fields)
+	public static function create (mixed ...$fields): self
 	{
 		return (new static)->add(...$fields);
 	}
