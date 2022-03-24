@@ -11,7 +11,7 @@ class core
 	private static $mem = null;
 	private static $run = null;
 	
-	public function __construct (string $workspace = null)
+	public function __construct (?string $workspace = null)
 	{
 		// log
 		core::log('__construct: %s', $workspace);
