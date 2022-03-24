@@ -254,24 +254,24 @@ class format
 		'ZW'	=> 'Zimbabwe'
 	];
 	const LATIN_ACCENTS = [
-		'ą' => 'a˛',
-		'ć' => 'c´',
-		'ę' => 'e˛',
-		'ł' => 'l~',
-		'ń' => 'n´',
-		'ó' => 'o´',
-		'ś' => 's´',
-		'ź' => 'z´',
-		'ż' => 'z˙',
-		'Ą' => 'A˛',
-		'Ć' => 'C´',
-		'Ę' => 'E˛',
-		'Ł' => 'L~',
-		'Ń' => 'N´',
-		'Ó' => 'O´',
-		'Ś' => 'S´',
-		'Ź' => 'Z´',
-		'Ż' => 'Z˙'
+		'ą' => 'a ̨',
+		'ć' => 'c ́',
+		'ę' => 'e ̨',
+		'ł' => 'l ̷',
+		'ń' => 'n ́',
+		'ó' => 'o ́',
+		'ś' => 's ́',
+		'ź' => 'z ́',
+		'ż' => 'z ̇',
+		'Ą' => 'A ̨',
+		'Ć' => 'C ́',
+		'Ę' => 'E ̨',
+		'Ł' => 'L ̷',
+		'Ń' => 'N ́',
+		'Ó' => 'O ́',
+		'Ś' => 'S ́',
+		'Ź' => 'Z ́',
+		'Ż' => 'Z ̇'
 	];
 	
 	public static function page (int $page_number = 1, int $total_items = 1): ?array
@@ -337,7 +337,7 @@ class format
 		return implode(' ', $out);
 	}
 	
-	public static function filter_recursive (array $input, callable $callback = null, int $flag = 0): array
+	public static function filter_recursive (array $input, ?callable $callback = null, int $flag = 0): array
 	{
 		foreach ($input as & $value)
 			if (is_array($value))
