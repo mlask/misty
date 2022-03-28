@@ -77,7 +77,7 @@ class view
 		});
 		
 		// debug/production mode
-		if (core::env()->request->getd('debug', false, request::TYPE_BOOL))
+		if (core::env()->request->getd('debug', false, REQUEST_VALUE_TYPE::BOOL))
 		{
 			$this->smarty->clearCompiledTemplate();
 		}
@@ -234,7 +234,7 @@ class view
 			'smarty'	=> [
 				'template_dir'	=> $this->smarty->getTemplateDir(),
 				'caching'		=> $this->smarty->caching,
-				'debug'			=> (int)core::env()->request->getd('debug', false, request::TYPE_BOOL),
+				'debug'			=> (int)core::env()->request->getd('debug', false, REQUEST_VALUE_TYPE::BOOL),
 				'vars'			=> array_keys($this->smarty->getTemplateVars())
 			]
 		];
@@ -250,7 +250,7 @@ class view
 		$this->smarty->assign([
 			'core_env'		=> core::env(),
 			'core_log'		=> core::log(),
-			'core_debug'	=> core::env()->request->getd('debug', false, request::TYPE_BOOL),
+			'core_debug'	=> core::env()->request->getd('debug', false, REQUEST_VALUE_TYPE::BOOL),
 			'view_assets'	=> $this->assets,
 			'i18n'			=> & core::env()->i18n
 		]);

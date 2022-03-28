@@ -2,10 +2,6 @@
 namespace misty;
 class request
 {
-	const TYPE_INT = 0;
-	const TYPE_BOOL = 1;
-	const TYPE_ARRAY = 2;
-	
 	public $xhr = null;
 	public $self = null;
 	public $query = null;
@@ -45,27 +41,27 @@ class request
 		return isset($this->req_get[$name]);
 	}
 	
-	public function any (string ...$args): mixed
+	public function any (mixed ...$args): mixed
 	{
 		return $this->_get_req('both', ...$args);
 	}
 	
-	public function get (string ...$args): mixed
+	public function get (mixed ...$args): mixed
 	{
 		return $this->_get_req('get', ...$args);
 	}
 	
-	public function post (string ...$args): mixed
+	public function post (mixed ...$args): mixed
 	{
 		return $this->_get_req('post', ...$args);
 	}
 	
-	public function anyd (string ...$args): mixed
+	public function anyd (mixed ...$args): mixed
 	{
 		return $this->_get_req_d('both', ...$args);
 	}
 	
-	public function getd (string ...$args): mixed
+	public function getd (mixed ...$args): mixed
 	{
 		return $this->_get_req_d('get', ...$args);
 	}
@@ -78,7 +74,7 @@ class request
 		return true;
 	}
 	
-	public function postd (string ...$args): mixed
+	public function postd (mixed ...$args): mixed
 	{
 		return $this->_get_req_d('post', ...$args);
 	}
@@ -310,7 +306,7 @@ class request
 		unset($qs);
 	}
 	
-	private function _get_req (string $type, string ...$args): mixed
+	private function _get_req (string $type, mixed ...$args): mixed
 	{
 		if (!empty($args))
 		{
@@ -321,7 +317,7 @@ class request
 		return null;
 	}
 	
-	private function _get_req_d (string $type, string ...$args): mixed
+	private function _get_req_d (string $type, mixed ...$args): mixed
 	{
 		if (is_array($args) && !empty($args))
 		{
@@ -332,27 +328,21 @@ class request
 			$value = isset($this->{'req_' . strtolower($type)}[$arg_name]) ? $this->{'req_' . strtolower($type)}[$arg_name] : $arg_def;
 			if ($value !== null && $arg_fmt !== null)
 			{
-				switch ($arg_fmt)
+				$value = match ($arg_fmt)
 				{
-					case self::TYPE_INT:
-					{
-						$value = (int)$value;
-						break;
-					}
-					case self::TYPE_BOOL:
-					{
-						$value = preg_match('/^(true|yes|y)$/i', $value) ? true : (preg_match('/^(false|no|n)$/i', $value) ? false : (bool)(int)$value);
-						break;
-					}
-					case self::TYPE_ARRAY:
-					{
-						$value = explode(',', preg_replace('/\s+/', '', $value));
-						break;
-					}
-				}
+					REQUEST_VALUE_TYPE::INT => (int)$value,
+					REQUEST_VALUE_TYPE::BOOL => preg_match('/^(true|yes|y)$/i', $value) ? true : (preg_match('/^(false|no|n)$/i', $value) ? false : (bool)(int)$value),
+					REQUEST_VALUE_TYPE::ARRAY => explode(',', preg_replace('/\s+/', '', $value))
+				};
 			}
 			return $value;
 		}
 		return null;
 	}
+};
+enum REQUEST_VALUE_TYPE
+{
+	case INT;
+	case BOOL;
+	case ARRAY;	
 };

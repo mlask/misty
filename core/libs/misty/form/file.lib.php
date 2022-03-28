@@ -173,16 +173,16 @@ class file
 				{
 					if (is_uploaded_file($_FILES[$this->name]['tmp_name'][$_idx]) && $_err !== UPLOAD_ERR_OK)
 					{
-						switch ($_err)
+						$this->errors[] = match ($_err)
 						{
-							case UPLOAD_ERR_INI_SIZE:	$this->errors[] = \misty\i18n::load()->_s('The uploaded file exceeds the upload_max_filesize directive in php.ini: %s', $_FILES[$this->name]['name'][$_idx]); break;
-							case UPLOAD_ERR_FORM_SIZE:	$this->errors[] = \misty\i18n::load()->_s('The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form: %s', $_FILES[$this->name]['name'][$_idx]); break;
-							case UPLOAD_ERR_PARTIAL:	$this->errors[] = \misty\i18n::load()->_s('The uploaded file was only partially uploaded: %s', $_FILES[$this->name]['name'][$_idx]); break;
-							case UPLOAD_ERR_NO_TMP_DIR:	$this->errors[] = \misty\i18n::load()->_s('Missing a temporary folder: %s', $_FILES[$this->name]['name'][$_idx]); break;
-							case UPLOAD_ERR_CANT_WRITE:	$this->errors[] = \misty\i18n::load()->_s('Failed to write file to disk: %s', $_FILES[$this->name]['name'][$_idx]); break;
-							case UPLOAD_ERR_EXTENSION:	$this->errors[] = \misty\i18n::load()->_s('A PHP extension stopped the file upload: %s', $_FILES[$this->name]['name'][$_idx]); break;
-							default:					$this->errors[] = \misty\i18n::load()->_s('Unknown upload error: %s', $_FILES[$this->name]['name'][$_idx]); break;
-						}
+							UPLOAD_ERR_PARTIAL => \misty\i18n::load()->_s('The uploaded file was only partially uploaded: %s', $_FILES[$this->name]['name'][$_idx]),
+							UPLOAD_ERR_INI_SIZE => \misty\i18n::load()->_s('The uploaded file exceeds the upload_max_filesize directive in php.ini: %s', $_FILES[$this->name]['name'][$_idx]),
+							UPLOAD_ERR_EXTENSION => \misty\i18n::load()->_s('A PHP extension stopped the file upload: %s', $_FILES[$this->name]['name'][$_idx]),
+							UPLOAD_ERR_FORM_SIZE => \misty\i18n::load()->_s('The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form: %s', $_FILES[$this->name]['name'][$_idx]),
+							UPLOAD_ERR_CANT_WRITE => \misty\i18n::load()->_s('Failed to write file to disk: %s', $_FILES[$this->name]['name'][$_idx]),
+							UPLOAD_ERR_NO_TMP_DIR => \misty\i18n::load()->_s('Missing a temporary folder: %s', $_FILES[$this->name]['name'][$_idx]),
+							default => \misty\i18n::load()->_s('Unknown upload error: %s', $_FILES[$this->name]['name'][$_idx])
+						};
 						$this->valid = 0;
 						break;
 					}
