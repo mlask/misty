@@ -8,7 +8,7 @@ class config
 	
 	public static function load (): ?self
 	{
-		if (!defined('\misty\core::VERSION'))
+		if (!class_exists('\misty\core') || \misty\core::env() === null)
 			throw new exception('Cannot load configuration without misty core!');
 		
 		if (self::$instance === null)

@@ -1,11 +1,8 @@
 <?php
+declare(strict_types = 1);
 namespace misty;
-
 class core
 {
-	const VERSION = 3.30;
-	const VERSION_DATE = 20220401;
-	
 	private static $env = null;
 	private static $log = null;
 	private static $mem = null;
@@ -13,6 +10,9 @@ class core
 	
 	public function __construct (?string $workspace = null)
 	{
+		if (PHP_VERSION_ID < 80100)
+			die("Required at least PHP version 8.1!\n\n");
+		
 		// log
 		core::log('__construct: %s', $workspace);
 		
@@ -33,7 +33,7 @@ class core
 		
 		// environment configuration
 		self::$env = new obj([
-			'core'		=> sprintf('Misty Core v%0.2f-d%d', self::VERSION, self::VERSION_DATE),
+			'core'		=> sprintf('Misty Core v%0.2f-d%d', version::number(), version::date()),
 			'uuid'		=> sprintf('misty3-%04x', crc32(realpath(dirname(dirname(__DIR__))))),
 			'root'		=> realpath(dirname(dirname(__DIR__))),
 			'local'		=> isset($_SERVER['SERVER_ADDR']) && isset($_SERVER['REMOTE_ADDR']) && $_SERVER['SERVER_ADDR'] === $_SERVER['REMOTE_ADDR'],
@@ -58,6 +58,7 @@ class core
 				self::$run[$event][] = $callable;
 			}
 		]);
+		core::log('misty version: %s', self::$env->core);
 		
 		// allow full access to env from workspace init
 		self::$env->allow(self::$env->path->absolute . '/' . self::$env->path->workspace . '/init.php');
