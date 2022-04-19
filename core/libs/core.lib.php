@@ -33,7 +33,7 @@ class core
 		
 		// environment configuration
 		self::$env = new obj([
-			'core'		=> sprintf('Misty Core v%0.2f-d%d', version::number(), version::date()),
+			'core'		=> sprintf('Misty Core %s-d%d (%s)', version::number(), version::date(), version::revision()),
 			'uuid'		=> sprintf('misty3-%04x', crc32(realpath(dirname(dirname(__DIR__))))),
 			'root'		=> realpath(dirname(dirname(__DIR__))),
 			'local'		=> isset($_SERVER['SERVER_ADDR']) && isset($_SERVER['REMOTE_ADDR']) && $_SERVER['SERVER_ADDR'] === $_SERVER['REMOTE_ADDR'],

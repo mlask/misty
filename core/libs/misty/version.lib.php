@@ -2,21 +2,19 @@
 namespace misty;
 enum version
 {
-	public static function date (): int
+	public static function date (): ?string
 	{
-		var_dump(self::_git_rev());die;
-		
-		return (int)self::_git_rev('date');
+		return date('Ymd', self::_git_rev()['date'] ?? time());
 	}
 	
-	public static function number (): float
+	public static function number (): ?string
 	{
-		return (float)self::_git_rev('tag');
+		return self::_git_rev()['tag'] ?? null;
 	}
 	
-	public static function revision (): string
+	public static function revision (): ?string
 	{
-		return self::_git_rev('revision');
+		return self::_git_rev()['hash_short'] ?? null;
 	}
 	
 	private static function _git_rev (): ?array
@@ -25,16 +23,22 @@ enum version
 		
 		if (file_exists($git_dir . '/HEAD'))
 		{
+			$ref = substr(trim(file_get_contents($git_dir . '/HEAD')), 5);
+			$hash = trim(file_get_contents($git_dir . '/' . $ref));
+			
+			foreach (glob($git_dir . '/refs/tags/v*') as $tag_id)
+				if (trim(file_get_contents($tag_id)) === $hash)
+					$tag = basename($tag_id);
+			
 			return [
-				'ref' => $ref = substr(trim(file_get_contents($git_dir . '/HEAD')), 5),
-				'date' => filemtime($git_dir . '/HEAD'),
-				'hash' => $hash = trim(file_get_contents($git_dir . '/' . $ref)),
+				'ref' => $ref,
+				'tag' => $tag ?? null,
+				'date' => filemtime($git_dir . '/index'),
+				'hash' => $hash,
 				'hash_short' => substr($hash, 0, 7)
 			];
-			return sprintf('%s@%s', str_replace('refs/heads/', '', $ref), substr(trim(file_get_contents(_ROOT . '/.git/' . $ref)), 0, 7));
 		}
-		else
-			die('no file: ' . $git_dir);
+		
 		return null;
 	}
 };
