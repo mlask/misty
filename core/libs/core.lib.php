@@ -52,7 +52,7 @@ class core
 			'request'	=> null,
 			'session'	=> null,
 			'instance'	=> null,
-			'after'		=> function ($event, $callable) {
+			'after'		=> function (string $event, callable $callable) {
 				if (!isset(self::$run[$event]))
 					self::$run[$event] = [];
 				self::$run[$event][] = $callable;
