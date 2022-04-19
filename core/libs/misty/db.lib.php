@@ -64,7 +64,7 @@ class db
 		if (!$this->pdo)
 			return false;
 		
-		return array_column(($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_ASSOC))->fetchAll() ?? [], 0);
+		return array_column(($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_NUM))->fetchAll() ?? [], 0);
 	}
 	
 	public function get_array (mixed ...$args): mixed

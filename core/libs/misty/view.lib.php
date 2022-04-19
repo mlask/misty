@@ -158,7 +158,7 @@ class view
 		}
 	}
 	
-	public function assign (string $variable, mixed $value = null): void
+	public function assign (mixed $variable, mixed $value = null): void
 	{
 		$this->smarty->assign($variable, $value);
 	}
