@@ -1,18 +1,8 @@
 <?php
 namespace misty;
-enum version
+class version
 {
-	public static function date (): ?string
-	{
-		return date('Ymd', self::_git_rev()['date'] ?? time());
-	}
-	
-	public static function number (): ?string
-	{
-		return self::_git_rev()['tag'] ?? null;
-	}
-	
-	public static function revision (): ?string
+	public static function get (): ?string
 	{
 		return self::_git_rev()['hash_short'] ?? null;
 	}
