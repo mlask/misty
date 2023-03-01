@@ -1,5 +1,7 @@
 <?php
 namespace misty;
+
+#[\AllowDynamicProperties]
 class config
 {
 	private static $instance = null;
@@ -23,7 +25,7 @@ class config
 	
 	public function get_all (bool $match = null): \generator
 	{
-		foreach ((new ReflectionObject($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $property)
+		foreach ((new \ReflectionObject($this))->getProperties(\ReflectionProperty::IS_PUBLIC) as $property)
 			if ($match === null || preg_match($match, $property->name))
 				yield $property->name => json_decode(json_encode($this->{$property->name}), true);
 	}
@@ -67,7 +69,7 @@ class config
 			{
 				if (!isset($target->{strtolower($key)}))
 				{
-					$target->{strtolower($key)} = new \stdclass;
+					$target->{strtolower($key)} = new \stdClass;
 					yield from $this->_config_map($value, $target->{strtolower($key)}, ($prefix !== null ? $prefix . '.' : '') . strtolower($key));
 				}
 			}
