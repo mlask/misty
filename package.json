@@ -1,9 +1,9 @@
 {
   "name": "misty3",
   "devDependencies": {
-    "@mdi/font": "*",
+    "@mdi/font": "^7.1.96",
     "acorn": "^8.6.0",
-    "bulma": "*",
+    "bulma": "^0.9.4",
     "chokidar": "^3.5.2",
     "glob-parent": "^6.0.2",
     "glob-stream": "^7.0.0",
