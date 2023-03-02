@@ -19,8 +19,10 @@ class module
 		if (method_exists($this, '__init'))
 		{
 			$status = $this->__init();
+			/*
 			if ($status === false)
 				$this->__break = true;
+			*/
 		}
 	}
 	

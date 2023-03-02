@@ -89,7 +89,7 @@ class request
 		$output = null;
 		if (is_array($args) && !empty($args))
 		{
-			foreach ($args as $arg)
+			foreach ($args as $name => $arg)
 				$output[$name] = is_array($arg) ? $this->param(array_shift($arg), array_shift($arg)) : $this->param($arg);
 		}
 		else

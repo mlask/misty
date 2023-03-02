@@ -2,10 +2,11 @@
 namespace misty\menu;
 class item
 {
-	private $name = null;
-	private $order = 0;
-	private $action = null;
-	private $submenu = null;
+	protected $name = null;
+	protected $order = 0;
+	protected $badge = null;
+	protected $action = null;
+	protected $submenu = null;
 	
 	public function __construct (string $name, ?string $action = null)
 	{

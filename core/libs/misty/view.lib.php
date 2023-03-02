@@ -41,8 +41,8 @@ class view
 			$power = $input > 0 ? floor(log($input, 1024)) : 0;
 			return sprintf($class !== null ? '%1$s <span class="%3$s">%2$s</span>' : '%1$s %2$s', number_format($input / pow(1024, $power), $decimals, ',', ' '), $units[$power], $class);
 		});
-		$this->smarty->registerPlugin('modifier', 'ftime', function ($input, $format = '%Y-%m-%d %H:%M:%S') {
-			return strftime($format, $input);
+		$this->smarty->registerPlugin('modifier', 'ftime', function ($input, $format = 'Y-m-d H:M:S') {
+			return (new \DateTime($input))->format($format);
 		});
 		$this->smarty->registerPlugin('modifier', 'ftimes', function ($input) {
 			return sprintf('%0d:%02d:%02d', $i = floor($input / 3600), floor(($input - ($i * 3600)) / 60) % 60, $input % 60);
