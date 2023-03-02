@@ -79,7 +79,7 @@ class request
 		return $this->_get_req_d('post', ...$args);
 	}
 	
-	public function param (string $name, mixed $default = null): mixed
+	public function param (string|int $name, mixed $default = null): mixed
 	{
 		return isset($this->req_call->nparam->{$name}) ? $this->req_call->nparam->{$name} : (isset($this->req_call->params->{$name}) ? $this->req_call->params->{$name} : $default);
 	}
@@ -260,10 +260,10 @@ class request
 				
 			foreach ($this->req_call->params->get() as $_pi => $_pp)
 			{
-				if (preg_match('/^([a-z0-9_]+?):(.+?)$/', $_pp, $_pm))
+				if (preg_match('/^([a-z0-9_-]+?):(.+?)$/', $_pp, $_pm))
 				{
 					$this->req_call->iparam[(int)$_pi] = new obj(['name' => $_pm[1], 'value' => $_pm[2], 'index' => $_pi, 'raw' => $_pp]);
-					$this->req_call->nparam->{$_pm[1]} = $_pm[2];
+					$this->req_call->nparam->{str_replace('-', '_', $_pm[1])} = $_pm[2];
 					unset($this->req_call->params->{$_pi});
 				}
 				else
@@ -344,5 +344,5 @@ enum REQUEST_VALUE_TYPE
 {
 	case INT;
 	case BOOL;
-	case ARRAY;	
+	case ARRAY;
 };

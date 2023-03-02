@@ -33,7 +33,7 @@ class menu
 		return $this;
 	}
 	
-	public function get (): ?self
+	public function get (): ?array
 	{
 		if (is_array($this->menu) && !empty($this->menu))
 		{

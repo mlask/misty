@@ -293,7 +293,7 @@ class db
 	{
 		// prosty parser instrukcji warunkowych, obsługujący poprawnie zagnieżdżone warunki
 		$tags = $repl = [];
-		for ($i = 0, $l = 0, $t = null; $i < strlen($input); $i ++)
+		for ($i = 0, $l = 0, $t = null; $i < strlen($input ?? ''); $i ++)
 		{
 			if (substr($input, $i, 4) === '/*{{')	{ $t[++ $l] = [$i, $l, null]; }
 			if (substr($input, $i, 6) === '/*}}*/')	{ $t[$l][2] = substr($input, $t[$l][0], $i - $t[$l][0] + 6); $tags[] = $t[$l --]; }

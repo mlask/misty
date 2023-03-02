@@ -58,7 +58,6 @@ class core
 				self::$run[$event][] = $callable;
 			}
 		]);
-		core::log('misty version: %s', self::$env->core);
 		
 		// allow full access to env from workspace init
 		self::$env->allow(self::$env->path->absolute . '/' . self::$env->path->workspace . '/init.php');
@@ -135,8 +134,8 @@ class core
 		core::log('processing extensions...');
 		foreach (array_merge(glob(self::$env->path->core . '/extensions/*.ext.php'), glob(self::$env->path->absolute . '/' . self::$env->path->workspace . '/extensions/*.ext.php')) as $_if)
 		{
-			core::log('loaded extension: %s', $_if);
 			require_once($_if);
+			core::log('loaded extension: %s', $_if);
 		}
 		
 		// run after "extensions"
@@ -252,7 +251,7 @@ class core
 							core::log('call module "%s", action "%s" (args %s)', $_mn, $_me->name, json_encode(self::$env->request->params()));
 							
 							foreach ($_me->getParameters() as $_p)
-								self::$env->instance->params->{$_p->getPosition()} = 
+								self::$env->instance->params->{$_p->getPosition()} =
 									self::$env->request->param($_p->getPosition(), self::$env->request->param($_p->getName(), $_p->isDefaultValueAvailable() ? $_p->getDefaultValue() : null));
 							$_me->invokeArgs(self::$env->instance->object, self::$env->instance->params->get());
 						}

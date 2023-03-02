@@ -92,7 +92,7 @@ class i18n
 	
 	/* ---------- Funkcje prywatne lub wykonywane automatycznie ---------- */
 	
-	private function __construct () 
+	private function __construct ()
 	{
 		$this->lang = self::DEFAULT_LANG ?: self::detect(true);
 		$this->_reload();
