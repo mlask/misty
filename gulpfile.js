@@ -33,7 +33,7 @@ gulp.task('sass', (done) => {
 gulp.task('fonts', (done) => {
 	pump([
 		gulp.src(['./node_modules/@mdi/font/fonts/*']),
-		gulp.dest('./frontend/styles/fonts')
+		gulp.dest('./frontend/styles/fonts/mdi')
 	], done);
 });
 gulp.task('default', gulp.parallel('js', 'sass', 'fonts'));

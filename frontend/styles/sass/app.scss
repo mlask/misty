@@ -1,4 +1,11 @@
 @import "_config";
+@import "_fonts";
+
+:root {
+	font-size: 14px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
 
 footer {
 	&.debug {
@@ -6,10 +13,11 @@ footer {
 		right: 0;
 		bottom: -35vh;
 		height: 35vh;
-		z-index: 100;
+		z-index: 1000;
 		position: fixed;
 		background: rgba(0, 0, 0, 0.6);
 		transition: bottom 0.2s ease;
+		font-family: $system-font-sans-serif;
 		backdrop-filter: blur(5px);
 		-webkit-backdrop-filter: blur(5px);
 		&:hover {
@@ -144,11 +152,11 @@ details {
 		}
 	}
 }
-section {
-	padding: 20px;
-}
+
 .message {
 	&.is-exception {
+		font-family: $system-font-sans-serif;
+		
 		.message-header {
 			justify-content: flex-start;
 			background-color: #800;
