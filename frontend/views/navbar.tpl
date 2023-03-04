@@ -36,10 +36,12 @@
 	</div>
 	<div class="navbar-end">
 		{if isset($core_env->user) && $core_env->user->auth}
-		<div class="navbar-item has-dropdown">
+		<div class="navbar-item has-dropdown is-hoverable">
 			<a class="navbar-link">
-				<b>{$core_env->user->data->user_name}</b> ({$core_env->user->data->role_name})<br>
-				{$core_env->user->data->user_login}
+				<span class="is-size-7">
+					<b>{$core_env->user->data->user_name}</b> ({$core_env->user->data->role_name})<br>
+					{$core_env->user->data->user_login}
+				</span>
 			</a>
 			<div class="navbar-dropdown">
 				{if $core_env->user->has_access('settings', 'user')}
