@@ -25,13 +25,15 @@
 		<div class="navbar-item has-text-weight-semibold has-text-primary">
 			misty³
 		</div>
-		<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+		{if $core_env->menu->get()}
+		<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="top-menu">
 			<span aria-hidden="true"></span>
 			<span aria-hidden="true"></span>
 			<span aria-hidden="true"></span>
 		</a>
+		{/if}
 	</div>
-	<div class="navbar-menu">
+	<div class="navbar-menu" id="top-menu">
 	{call name="menu" items=$core_env->menu->get()}
 	</div>
 	<div class="navbar-end">

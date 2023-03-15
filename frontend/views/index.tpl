@@ -43,6 +43,7 @@
 	{if isset($core_debug) && $core_debug}
 	{include "debug.tpl"}
 	{/if}
+	<script defer src="frontend/js/core.js"></script>
 	{if isset($view_assets.js)}
 	{foreach $view_assets.js as $_asset_js}
 	<script defer src="{$_asset_js.relpath}?{$_asset_js.ts}"></script>

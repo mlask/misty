@@ -18,24 +18,12 @@
 		<h6>{$i18n->_('Status')}</h6>
 		<table class="log">
 			<tr>
-				<td>memory_get_usage(true)</td>
-				<td><code class="text">{"%0.2f kB"|sprintf:(memory_get_usage(true)/1024)}</code></span>
+				<td>mem</td>
+				<td><code class="text">{"%0.2f kB"|sprintf:(memory_get_usage(false)/1024)}</code></span>
 			</tr>
 			<tr>
-				<td>memory_get_peak_usage(true)</td>
-				<td><code class="text">{"%0.2f kB"|sprintf:(memory_get_peak_usage(true)/1024)}</code></span>
-			</tr>
-			<tr>
-				<td>get_resources()</td>
-				<td><code class="text">{get_resources()|json_encode}</code></span>
-			</tr>
-			<tr>
-				<td>getrusage()</td>
-				<td><code class="text">{getrusage()|json_encode}</code></span>
-			</tr>
-			<tr>
-				<td>gc_status()</td>
-				<td><code class="text">{gc_status()|json_encode}</code></span>
+				<td>peak mem</td>
+				<td><code class="text">{"%0.2f kB"|sprintf:(memory_get_peak_usage(false)/1024)}</code></span>
 			</tr>
 		</table>
 	</div>
