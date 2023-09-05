@@ -11,7 +11,10 @@ class db
 	
 	private static $instances = null;
 	private $config = null;
+	private $count = 0;
+	private $time = 0;
 	private $pdo = null;
+	private $id = null;
 	
 	public function __construct (array $config)
 	{
@@ -28,6 +31,7 @@ class db
 		];
 		
 		$this->config = array_merge($default, $config);
+		$this->id = md5(json_encode($this->config));
 		$this->_init_pdo();
 	}
 	
@@ -43,7 +47,7 @@ class db
 	
 	public function query (mixed ...$args): mixed
 	{
-		return $this->pdo ? $this->pdo->query($this->_build_query(...$args)) : false;
+		return $this->pdo ? $this->_measure(microtime(true), $this->pdo->query($this->_build_query(...$args))) : false;
 	}
 	
 	public function query_simple (mixed ...$args): mixed
@@ -56,7 +60,7 @@ class db
 		if (!$this->pdo)
 			return false;
 		
-		return ($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_ASSOC))->fetch();
+		return ($this->_measure(microtime(true), $this->pdo->query($this->_build_query(...$args), \PDO::FETCH_ASSOC)))->fetch();
 	}
 	
 	public function get_col (mixed ...$args): mixed
@@ -64,7 +68,7 @@ class db
 		if (!$this->pdo)
 			return false;
 		
-		return array_column(($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_NUM))->fetchAll() ?? [], 0);
+		return array_column(($this->_measure(microtime(true), $this->pdo->query($this->_build_query(...$args), \PDO::FETCH_NUM)))->fetchAll() ?? [], 0);
 	}
 	
 	public function get_array (mixed ...$args): mixed
@@ -72,7 +76,7 @@ class db
 		if (!$this->pdo)
 			return false;
 		
-		return ($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_ASSOC))->fetchAll();
+		return ($this->_measure(microtime(true), $this->pdo->query($this->_build_query(...$args), \PDO::FETCH_ASSOC)))->fetchAll();
 	}
 	
 	public function get_field (mixed ...$args): mixed
@@ -80,7 +84,7 @@ class db
 		if (!$this->pdo)
 			return false;
 		
-		return ($this->pdo->query($this->_build_query(...$args), \PDO::FETCH_NUM))->fetch()[0] ?? false;
+		return ($this->_measure(microtime(true), $this->pdo->query($this->_build_query(...$args), \PDO::FETCH_NUM)))->fetch()[0] ?? false;
 	}
 	
 	public function preview_query (mixed ...$args): string
@@ -129,18 +133,18 @@ class db
 						\PDO::MYSQL_ATTR_INIT_COMMAND	=> sprintf("SET NAMES '%s'", strtoupper($this->config['charset']))
 					]);
 					$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-					core::log('db connected to mysql');
+					core::log('db(%s) connected to mysql', $this->id);
 					break;
 				}
 				default:
 				{
-					core::log('db engine not set');
+					core::log('db(%s) engine not set', $this->id);
 				}
 			}
 		}
 		catch (\PDOException $e)
 		{
-			core::log('db exception: %s', $e->getMessage());
+			core::log('db(%s) exception: %s', $this->id, $e->getMessage());
 			throw new exception($e->getMessage());
 		}
 	}
@@ -194,7 +198,7 @@ class db
 						$params[$_avk] = $_avv;
 				$params[$_ai + 1] = $_av;
 			}
-			core::log('db parameters: %s', json_encode($params));
+			core::log('db(%s) query #%d parameters: %s', $this->id, $this->count + 1, json_encode($params));
 			$sql = preg_replace_callback('/\[::(.+?)\]/', function ($match) use ($params) { return $this->_replace_tag($match, $params); }, $sql);
 		}
 		
@@ -205,7 +209,7 @@ class db
 		if (strpos($sql, '/*{{') !== false)
 			$sql = $this->_conditionals($sql);
 		
-		core::log('sql: %s', $sql, ['level' => 3]);
+		core::log('db(%s) query #%d -- %s', $this->id, ++ $this->count, $sql, ['level' => 3]);
 		return $sql;
 	}
 	
@@ -306,9 +310,16 @@ class db
 
 	private function _conditionals_replace (array $input): mixed
 	{
-		core::log('db conditional: %s', $input[1]);
+		core::log('db(%s) query #%d conditional: %s', $this->id, $this->count + 1, $input[1]);
 		if (eval('return (' . $input[1] . ');'))
 			return $input[2];
 		return isset($input[4]) ? $input[4] : null;
+	}
+	
+	private function _measure (float $uts, \PDOStatement $query): \PDOStatement
+	{
+		$this->time += (microtime(true) - $uts);
+		core::log('db(%s) query #%d execution took %0.4fs (total %0.4fs)', $this->id, $this->count, microtime(true) - $uts, $this->time);
+		return $query;
 	}
 };

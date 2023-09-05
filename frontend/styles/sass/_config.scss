@@ -8,7 +8,8 @@ $mdi-font-path: "fonts/mdi" !default;
 
 // Bulma config
 $primary: #457b9d;
-$family-sans-serif: "Montserrat", $system-font-sans-serif;
+$family-sans-serif: "Montserrat VAR", $system-font-sans-serif;
+$family-sans-serif-alt: "Inter VAR", $system-font-sans-serif;
 $family-monospace: $system-font-monospace;
 $modal-background-background-color: rgba(0, 0, 0, 0.5);
 $modal-z: 999;
