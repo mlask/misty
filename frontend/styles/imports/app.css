@@ -146,6 +146,7 @@ footer {
 			}
 		}
 		.message-body {
+			color: var(--bulma-warning-light-invert);
 			padding: 0;
 			overflow: hidden;
 			background-color: var(--bulma-warning-light);
