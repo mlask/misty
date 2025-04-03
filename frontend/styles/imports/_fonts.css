@@ -1,0 +1,27 @@
+/* Material Design Icons */
+@import url("https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css");
+
+/* Montserrat, https://github.com/JulietaUla/Montserrat */
+@font-face {
+	font-style: normal;
+	font-family: "Montserrat VAR";
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("../fonts/Montserrat/Montserrat[wght].woff2") format("woff2");
+}
+@font-face {
+	font-style: italic;
+	font-family: "Montserrat VAR";
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("../fonts/Montserrat/Montserrat-Italic[wght].woff2") format("woff2");
+}
+
+/* Inter, https://rsms.me/inter/ */
+@font-face {
+	font-style: oblique 0deg 10deg;
+	font-family: "Inter VAR";
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("../fonts/Inter/Inter.var.woff2?v=3.19") format("woff2");
+}

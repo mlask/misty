@@ -12,4 +12,9 @@ class test_module extends module
 		// main module
 		$this->view->render('[module]test.tpl', view::PAGE);
 	}
+	
+	public function testx (): void
+	{
+		throw new exception('test');
+	}
 }

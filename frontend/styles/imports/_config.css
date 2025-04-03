@@ -1,0 +1,14 @@
+:root {
+	/* System stack fonts */
+	--bulma-family-secondary: "Montserrat VAR", Iowan Old Style, Apple Garamond, Baskerville, Times New Roman, Droid Serif, Times, Source Serif Pro, serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+	--bulma-family-primary: "Inter VAR", system-ui, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
+	--bulma-family-code: ui-monospace, Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace;
+	
+	/* Primary color */
+	--bulma-primary-h: 219;
+	--bulma-primary-s: 71%;
+	--bulma-primary-l: 24%;
+	--bulma-primary-invert-h: 0;
+	--bulma-primary-invert-s: 100%;
+	--bulma-primary-invert-l: 100%;
+}

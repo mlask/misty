@@ -31,7 +31,7 @@ class view
 		$this->smarty->setCaching(\Smarty::CACHING_OFF);
 		
 		// map some of standard PHP functions as modifiers (due to deprecation in Smarty)
-		foreach (['basename', 'dirname', 'filemtime', 'floatval', 'json_encode', 'ltrim', 'print_r', 'rtrim', 'sprintf', 'trim', 'urlencode'] as $fn)
+		foreach (['basename', 'dirname', 'filemtime', 'floatval', 'json_encode', 'ltrim', 'print_r', 'rtrim', 'sprintf', 'trim', 'urlencode', 'memory_get_usage', 'memory_get_peak_usage'] as $fn)
 			$this->smarty->registerPlugin('modifier', $fn, fn(...$args) => $fn(...$args));
 		
 		// custom modifiers

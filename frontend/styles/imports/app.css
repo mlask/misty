@@ -1,10 +1,16 @@
-@import "_config";
-@import "_fonts";
+@import url("_fonts.css");
+@import url("_config.css");
 
-:root {
-	font-size: 14px;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+.subtitle, .title {
+	--bulma-title-family: var(--bulma-family-secondary);
+	--bulma-subtitle-family: var(--bulma-family-secondary);
+	
+	&:is(.title) {
+		font-family: var(--bulma-title-family);
+	}
+	&:is(.subtitle) {
+		font-family: var(--bulma-subtitle-family);
+	}
 }
 
 footer {
@@ -15,48 +21,53 @@ footer {
 		height: 35vh;
 		z-index: 1000;
 		position: fixed;
-		background: rgba(0, 0, 0, 0.6);
+		background: rgba(0, 0, 0, 0.7);
 		transition: bottom 0.2s ease;
-		font-family: $system-font-sans-serif;
+		font-family: var(--bulma-family-primary);
 		backdrop-filter: blur(5px);
 		-webkit-backdrop-filter: blur(5px);
+		
 		&:hover {
 			bottom: 0;
-			box-shadow: 0 -1px 5px 0 rgba(0, 0, 0, 0.4);
+			box-shadow: 0 -1px 5px 0 rgba(0, 0, 0, 0.5);
+			
 			&::before {
-				content: char(map-get($mdi-icons, "close"));
+				content: "\2715";
 			}
 		}
 		&::before {
-			@extend .#{$mdi-css-prefix}-set;
 			top: -30px;
 			color: #fff;
 			left: calc(50% - 50px);
 			width: 100px;
 			height: 40px;
-			content: char(map-get($mdi-icons, "message-bulleted"));
+			content: "\2630";
 			z-index: 10;
 			position: absolute;
+			clip-path: rect(-5px 105px 30px -5px);
 			font-size: 20px;
-			background: rgba(80, 80, 80, 1);
-			box-shadow: 0 -1px 5px 0 rgba(0, 0, 0, 0.4);
+			background: color-mix(in oklab, color(display-p3 0.9 0.45 0.2), #000 20%);
+			box-shadow: 0 -1px 5px 0 rgba(0, 0, 0, 0.5);
 			text-align: center;
 			line-height: 30px;
 			border-radius: 4px;
 			backdrop-filter: blur(5px);
 			-webkit-backdrop-filter: blur(5px);
 		}
-		h6 {
+		
+		.header {
 			top: 0;
 			color: #fff;
 			margin: 0;
-			padding: 10px;
+			padding: 5px 10px;
 			z-index: 10;
 			position: sticky;
-			background: rgba(80, 80, 80, 1);
+			font-size: 12px;
+			background: color-mix(in oklab, color(display-p3 0.9 0.45 0.2), #000 20%);
 			font-weight: bold;
+			
 			&.exception {
-				background: rgba(200, 0, 0, 1);
+				background: color(display-p3 0.83 0.329 0.324);
 			}
 		}
 		.log {
@@ -65,11 +76,13 @@ footer {
 			border: none;
 			font-size: 12px;
 			table-layout: fixed;
+			
 			td {
 				border: none;
 				padding: 5px 10px;
 				overflow: hidden;
 				text-overflow: ellipsis;
+				
 				&:first-child {
 					color: rgba(255, 255, 255, 0.6);
 					width: 150px;
@@ -87,7 +100,7 @@ footer {
 					white-space: pre-wrap;
 				}
 				.info {
-					color: rgba(255, 255, 255, 0.6);
+					color: color-mix(in oklab, #fff, transparent 40%);
 					display: block;
 					font-size: 10px;
 				}
@@ -109,62 +122,14 @@ footer {
 		}
 	}
 }
-details {
-	&.collapsible {
-		summary {
-			cursor: pointer;
-			display: block;
-			padding: 5px 10px 5px 26px;
-			position: relative;
-			font-size: 80%;
-			-moz-user-select: none;
-			-webkit-user-select: none;
-			&:hover {
-				background: rgba(0, 0, 0, 0.1);
-			}
-			&:focus {
-				outline: none;
-			}
-			&::-webkit-details-marker {
-				display: none;
-			}
-			&::before {
-				left: 10px;
-				content: "\25B6";
-				position: absolute;
-			}
-		}
-		summary ~ * {
-			color: #fff;
-			padding: 5px 10px;
-			font-size: 75%;
-			background: #444;
-			tab-size: 20px;
-		}
-		&[open] {
-			color: #fff;
-			background: #333;
-			summary {
-				&::before {
-					content: "\25BC";
-				}
-			}
-		}
-	}
-}
 
-.modal {
-	&-content {
-		box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
-	}
-}
 .message {
 	&.is-exception {
-		font-family: $system-font-sans-serif;
-		
 		.message-header {
+			color: var(--bulma-warning-invert);
 			justify-content: flex-start;
-			background-color: #800;
+			background-color: var(--bulma-warning);
+			
 			.icon {
 				align-self: flex-start;
 				margin-right: 10px;
@@ -183,7 +148,8 @@ details {
 		.message-body {
 			padding: 0;
 			overflow: hidden;
-			background-color: lighten(#800, 65%);
+			background-color: var(--bulma-warning-light);
+			
 			.path {
 				opacity: 0.6;
 				font-size: 80%;
@@ -192,6 +158,51 @@ details {
 				overflow: auto;
 				font-size: 60%;
 				max-height: 300px;
+			}
+		}
+	}
+	
+	details {
+		&.collapsible {
+			summary {
+				cursor: pointer;
+				display: block;
+				padding: 5px 10px 5px 26px;
+				position: relative;
+				font-size: 80%;
+				user-select: none;
+				
+				&:hover {
+					background: rgba(0, 0, 0, 0.1);
+				}
+				&:focus {
+					outline: none;
+				}
+				&::-webkit-details-marker {
+					display: none;
+				}
+				&::before {
+					left: 10px;
+					content: "\25B6";
+					position: absolute;
+				}
+			}
+			summary ~ * {
+				color: #fff;
+				padding: 5px 10px;
+				tab-size: 20px;
+				font-size: 75%;
+				background: color-mix(in oklab, #000, #fff 44%);
+			}
+			&[open] {
+				color: #fff;
+				background: color-mix(in oklab, #000, #fff 33%);
+				
+				summary {
+					&::before {
+						content: "\25BC";
+					}
+				}
 			}
 		}
 	}
